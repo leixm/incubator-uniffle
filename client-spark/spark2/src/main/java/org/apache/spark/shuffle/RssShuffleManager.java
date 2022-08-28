@@ -341,7 +341,7 @@ public class RssShuffleManager implements ShuffleManager {
       Map<Integer, List<ShuffleServerInfo>> partitionToServers = rssShuffleHandle.getPartitionToServers();
       Roaring64NavigableMap blockIdBitmap = shuffleWriteClient.getShuffleResult(
           clientType, Sets.newHashSet(partitionToServers.get(startPartition)),
-          rssShuffleHandle.getAppId(), shuffleId, startPartition);
+          rssShuffleHandle.getAppId(), shuffleId, startPartition, startPartition);
       LOG.info("Get shuffle blockId cost " + (System.currentTimeMillis() - start) + " ms, and get "
           + blockIdBitmap.getLongCardinality() + " blockIds for shuffleId[" + shuffleId + "], partitionId["
           + startPartition + "]");

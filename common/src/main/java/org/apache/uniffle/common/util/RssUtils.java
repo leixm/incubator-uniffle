@@ -35,11 +35,13 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.net.InetAddresses;
 import org.roaringbitmap.longlong.Roaring64NavigableMap;
 import org.slf4j.Logger;
@@ -291,5 +293,22 @@ public class RssUtils {
       return "";
     }
     return hostName.replaceAll("[\\.-]", "_");
+  }
+
+  public static Map<Integer, Roaring64NavigableMap> shuffleBitmapToPartitionBitmap(
+      Roaring64NavigableMap shuffleBitmap) {
+    Iterator<Long> it = shuffleBitmap.iterator();
+    Map<Integer, Roaring64NavigableMap> res = Maps.newHashMap();
+    long mask = (1L << Constants.PARTITION_ID_MAX_LENGTH) - 1;
+    while (it.hasNext()) {
+      Long blockId = it.next();
+      int partitionId = Math.toIntExact((blockId >> Constants.TASK_ATTEMPT_ID_MAX_LENGTH) & mask);
+      if (res.get(partitionId) == null) {
+        res.putIfAbsent(partitionId, Roaring64NavigableMap.bitmapOf(blockId));
+      } else {
+        res.get(partitionId).add(blockId);
+      }
+    }
+    return res;
   }
 }

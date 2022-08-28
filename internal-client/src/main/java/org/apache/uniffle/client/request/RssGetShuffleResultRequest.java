@@ -21,12 +21,15 @@ public class RssGetShuffleResultRequest {
 
   private String appId;
   private int shuffleId;
-  private int partitionId;
+  private int startPartition;
+  private int endPartition;
 
-  public RssGetShuffleResultRequest(String appId, int shuffleId, int partitionId) {
+  public RssGetShuffleResultRequest(String appId, int shuffleId, int startPartition,
+      int endPartition) {
     this.appId = appId;
     this.shuffleId = shuffleId;
-    this.partitionId = partitionId;
+    this.startPartition = startPartition;
+    this.endPartition = endPartition;
   }
 
   public String getAppId() {
@@ -37,7 +40,11 @@ public class RssGetShuffleResultRequest {
     return shuffleId;
   }
 
-  public int getPartitionId() {
-    return partitionId;
+  public Integer getStartPartition() {
+    return startPartition;
+  }
+
+  public Integer getEndPartition() {
+    return endPartition;
   }
 }

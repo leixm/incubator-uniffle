@@ -190,6 +190,34 @@ public class RssUtilsTest {
     assertEquals(testStr, extsObjs.get(0).get());
   }
 
+  @Test
+  public void testShuffleBitmapToPartitionBitmap() {
+    Roaring64NavigableMap partition1Bitmap = Roaring64NavigableMap.bitmapOf(
+        getBlockId(0, 0, 0),
+        getBlockId(0, 0, 1),
+        getBlockId(0, 1, 0),
+        getBlockId(0, 1, 1));
+    Roaring64NavigableMap partition2Bitmap = Roaring64NavigableMap.bitmapOf(
+        getBlockId(1, 0, 0),
+        getBlockId(1, 0, 1),
+        getBlockId(1, 1, 0),
+        getBlockId(1, 1, 1));
+    Roaring64NavigableMap shuffleBitmap = Roaring64NavigableMap.bitmapOf();
+    shuffleBitmap.or(partition1Bitmap);
+    shuffleBitmap.or(partition2Bitmap);
+    assertEquals(8, shuffleBitmap.getLongCardinality());
+    Map<Integer, Roaring64NavigableMap> toPartitionBitmap =
+        RssUtils.shuffleBitmapToPartitionBitmap(shuffleBitmap);
+    assertEquals(2, toPartitionBitmap.size());
+    assertEquals(partition1Bitmap, toPartitionBitmap.get(0));
+    assertEquals(partition2Bitmap, toPartitionBitmap.get(1));
+  }
+
+  private Long getBlockId(long partitionId, long taskAttemptId, long atomicInt) {
+    return (atomicInt << (Constants.PARTITION_ID_MAX_LENGTH + Constants.TASK_ATTEMPT_ID_MAX_LENGTH))
+        + (partitionId << Constants.TASK_ATTEMPT_ID_MAX_LENGTH) + taskAttemptId;
+  }
+
   interface RssUtilTestDummy {
     String get();
   }

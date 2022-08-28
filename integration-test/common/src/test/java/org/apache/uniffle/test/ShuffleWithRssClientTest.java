@@ -141,7 +141,7 @@ public class ShuffleWithRssClientTest extends ShuffleReadWriteBase {
     shuffleWriteClientImpl.reportShuffleResult(partitionToServers, testAppId, 0, 0, ptb, 2);
     Roaring64NavigableMap report = shuffleWriteClientImpl.getShuffleResult("GRPC",
         Sets.newHashSet(shuffleServerInfo1, fakeShuffleServerInfo),
-        testAppId, 0, 0);
+        testAppId, 0, 0, 0);
     assertEquals(blockIdBitmap, report);
   }
 
@@ -174,12 +174,12 @@ public class ShuffleWithRssClientTest extends ShuffleReadWriteBase {
 
     Roaring64NavigableMap bitmap = shuffleWriteClientImpl
         .getShuffleResult("GRPC", Sets.newHashSet(shuffleServerInfo1), testAppId,
-        1, 0);
+        1, 0, 0);
     assertTrue(bitmap.isEmpty());
 
     bitmap = shuffleWriteClientImpl
         .getShuffleResult("GRPC", Sets.newHashSet(shuffleServerInfo1), testAppId,
-        1, 1);
+        1, 1, 1);
     assertEquals(5, bitmap.getLongCardinality());
     for (int i = 0; i < 5; i++) {
       assertTrue(bitmap.contains(partitionToBlocks.get(1).get(i)));
@@ -187,22 +187,22 @@ public class ShuffleWithRssClientTest extends ShuffleReadWriteBase {
 
     bitmap = shuffleWriteClientImpl
         .getShuffleResult("GRPC", Sets.newHashSet(shuffleServerInfo1), testAppId,
-        1, 2);
+        1, 2, 2);
     assertTrue(bitmap.isEmpty());
 
     bitmap = shuffleWriteClientImpl
         .getShuffleResult("GRPC", Sets.newHashSet(shuffleServerInfo2), testAppId,
-        1, 0);
+        1, 0, 0);
     assertTrue(bitmap.isEmpty());
 
     bitmap = shuffleWriteClientImpl
         .getShuffleResult("GRPC", Sets.newHashSet(shuffleServerInfo2), testAppId,
-        1, 1);
+        1, 1, 1);
     assertTrue(bitmap.isEmpty());
 
     bitmap = shuffleWriteClientImpl
         .getShuffleResult("GRPC", Sets.newHashSet(shuffleServerInfo2), testAppId,
-        1, 2);
+        1, 2, 2);
     assertEquals(7, bitmap.getLongCardinality());
     for (int i = 0; i < 7; i++) {
       assertTrue(bitmap.contains(partitionToBlocks.get(2).get(i)));

@@ -32,7 +32,10 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
+import com.google.common.collect.Range;
+import com.google.common.collect.RangeMap;
 import com.google.common.collect.Sets;
+import com.google.common.collect.TreeRangeMap;
 import org.roaringbitmap.longlong.LongIterator;
 import org.roaringbitmap.longlong.Roaring64NavigableMap;
 import org.slf4j.Logger;
@@ -263,42 +266,50 @@ public class ShuffleTaskManager {
     return requireId;
   }
 
-  public byte[] getFinishedBlockIds(
-      String appId, Integer shuffleId, Integer partitionId) throws IOException {
+  public byte[] getFinishedBlockIds(String appId, Integer shuffleId, Integer startPartition,
+      Integer endPartition) throws IOException {
     refreshAppId(appId);
-    Storage storage = storageManager.selectStorage(new ShuffleDataReadEvent(appId, shuffleId, partitionId));
-    // update shuffle's timestamp that was recently read.
-    storage.updateReadMetrics(new StorageReadMetrics(appId, shuffleId));
-
+    for (int partitionId = startPartition; partitionId <= endPartition; partitionId++) {
+      Storage storage = storageManager.selectStorage(new ShuffleDataReadEvent(appId, shuffleId, partitionId));
+      // update shuffle's timestamp that was recently read.
+      storage.updateReadMetrics(new StorageReadMetrics(appId, shuffleId));
+    }
     Map<Integer, Roaring64NavigableMap[]> shuffleIdToPartitions = partitionsToBlockIds.get(appId);
     if (shuffleIdToPartitions == null) {
       return null;
     }
+
     Roaring64NavigableMap[] blockIds = shuffleIdToPartitions.get(shuffleId);
     if (blockIds == null) {
       return new byte[]{};
     }
-    Roaring64NavigableMap bitmap = blockIds[partitionId % blockIds.length];
-    if (bitmap == null) {
-      return new byte[]{};
+    RangeMap<Integer, Roaring64NavigableMap> partitionRangeToBitMap = TreeRangeMap.create();
+    for (int partitionId = startPartition; partitionId <= endPartition; partitionId++) {
+      Roaring64NavigableMap bitmap = blockIds[partitionId % blockIds.length];
+      partitionRangeToBitMap.put(Range.closed(partitionId, partitionId), bitmap);
     }
 
-    if (partitionId > Constants.MAX_PARTITION_ID) {
-      throw new RuntimeException("Get invalid partitionId[" + partitionId
-          + "] which greater than " + Constants.MAX_PARTITION_ID);
+    Roaring64NavigableMap res = Roaring64NavigableMap.bitmapOf();
+    for (Map.Entry<Range<Integer>, Roaring64NavigableMap> entry :
+        partitionRangeToBitMap.asMapOfRanges().entrySet()) {
+      long startPartId = entry.getKey().lowerEndpoint();
+      long endPartId = entry.getKey().upperEndpoint();
+      Roaring64NavigableMap bitmap = getBlockIdsByPartitionId(startPartId, endPartId,
+          entry.getValue());
+      res.or(bitmap);
     }
-
-    return RssUtils.serializeBitMap(getBlockIdsByPartitionId(partitionId, bitmap));
+    return RssUtils.serializeBitMap(res);
   }
 
   // partitionId is passed as long to calculate minValue/maxValue
-  protected Roaring64NavigableMap getBlockIdsByPartitionId(long partitionId, Roaring64NavigableMap bitmap) {
+  protected Roaring64NavigableMap getBlockIdsByPartitionId(long startPartition, long endPartition,
+      Roaring64NavigableMap bitmap) {
     Roaring64NavigableMap result = Roaring64NavigableMap.bitmapOf();
     LongIterator iter = bitmap.getLongIterator();
-    long minValue = partitionId << Constants.TASK_ATTEMPT_ID_MAX_LENGTH;
+    long minValue = startPartition << Constants.TASK_ATTEMPT_ID_MAX_LENGTH;
     long maxValue = Long.MAX_VALUE;
-    if (partitionId < Constants.MAX_PARTITION_ID) {
-      maxValue = (partitionId + 1) << (Constants.TASK_ATTEMPT_ID_MAX_LENGTH);
+    if (endPartition < Constants.MAX_PARTITION_ID) {
+      maxValue = (endPartition + 1) << (Constants.TASK_ATTEMPT_ID_MAX_LENGTH);
     }
     long mask = (1L << (Constants.TASK_ATTEMPT_ID_MAX_LENGTH + Constants.PARTITION_ID_MAX_LENGTH)) - 1;
     while (iter.hasNext()) {

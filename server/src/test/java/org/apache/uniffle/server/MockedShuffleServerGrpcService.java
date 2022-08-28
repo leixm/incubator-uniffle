@@ -74,4 +74,14 @@ public class MockedShuffleServerGrpcService extends ShuffleServerGrpcService {
     }
     super.getShuffleResult(request, responseObserver);
   }
+
+  @Override
+  public void getShuffleResultForMultiPart(RssProtos.GetShuffleResultForMultiPartRequest request,
+      StreamObserver<RssProtos.GetShuffleResultResponse> responseObserver) {
+    if (mockedTimeout > 0) {
+      LOG.info("Add a mocked timeout on getShuffleResult");
+      Uninterruptibles.sleepUninterruptibly(mockedTimeout, TimeUnit.MILLISECONDS);
+    }
+    super.getShuffleResultForMultiPart(request, responseObserver);
+  }
 }

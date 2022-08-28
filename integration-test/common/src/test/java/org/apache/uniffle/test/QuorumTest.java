@@ -295,7 +295,7 @@ public class QuorumTest extends ShuffleReadWriteBase {
         partitionToBlockIds, 1);
     Roaring64NavigableMap report = shuffleWriteClientImpl.getShuffleResult("GRPC",
         Sets.newHashSet(shuffleServerInfo0, shuffleServerInfo1, shuffleServerInfo2),
-        testAppId, 0, 0);
+        testAppId, 0, 0, 0);
     assertEquals(report, blockIdBitmap);
 
     // data read should success
@@ -358,7 +358,7 @@ public class QuorumTest extends ShuffleReadWriteBase {
     try {
       shuffleWriteClientImpl.getShuffleResult("GRPC",
           Sets.newHashSet(shuffleServerInfo0, shuffleServerInfo1, shuffleServerInfo2),
-          testAppId, 0, 0);
+          testAppId, 0, 0, 0);
       fail(EXPECTED_EXCEPTION_MESSAGE);
     } catch (Exception e) {
       assertTrue(e.getMessage().startsWith("Get shuffle result is failed"));
@@ -402,7 +402,7 @@ public class QuorumTest extends ShuffleReadWriteBase {
 
     Roaring64NavigableMap report = shuffleWriteClientImpl.getShuffleResult("GRPC",
         Sets.newHashSet(shuffleServerInfo0, shuffleServerInfo1, shuffleServerInfo2),
-        testAppId, 0, 0);
+        testAppId, 0, 0, 0);
     assertEquals(report, blockIdBitmap);
 
     // let this server be failed, the reading will be also be failed
@@ -410,7 +410,7 @@ public class QuorumTest extends ShuffleReadWriteBase {
     try {
       report = shuffleWriteClientImpl.getShuffleResult("GRPC",
         Sets.newHashSet(shuffleServerInfo0, shuffleServerInfo1, shuffleServerInfo2),
-        testAppId, 0, 0);
+        testAppId, 0, 0, 0);
       fail(EXPECTED_EXCEPTION_MESSAGE);
     } catch (Exception e) {
       assertTrue(e.getMessage().startsWith("Get shuffle result is failed"));
@@ -420,7 +420,7 @@ public class QuorumTest extends ShuffleReadWriteBase {
     disableTimeout((MockedShuffleServer)shuffleServers.get(2));
     report = shuffleWriteClientImpl.getShuffleResult("GRPC",
       Sets.newHashSet(shuffleServerInfo0, shuffleServerInfo1, shuffleServerInfo2),
-      testAppId, 0, 0);
+      testAppId, 0, 0, 0);
     assertEquals(report, blockIdBitmap);
   }
 
@@ -471,7 +471,7 @@ public class QuorumTest extends ShuffleReadWriteBase {
         partitionToBlockIds, 1);
     Roaring64NavigableMap report = shuffleWriteClientImpl.getShuffleResult("GRPC",
         Sets.newHashSet(shuffleServerInfo0, shuffleServerInfo1, shuffleServerInfo2),
-        testAppId, 0, 0);
+        testAppId, 0, 0, 0);
     assertEquals(report, blockIdBitmap);
 
     // data read should success
@@ -489,7 +489,7 @@ public class QuorumTest extends ShuffleReadWriteBase {
     shuffleServers.get(1).start();
     report = shuffleWriteClientImpl.getShuffleResult("GRPC",
       Sets.newHashSet(shuffleServerInfo0, shuffleServerInfo1, shuffleServerInfo2),
-      testAppId, 0, 0);
+      testAppId, 0, 0, 0);
     assertEquals(report, blockIdBitmap);
 
     // when two servers are restarted, getShuffleResult should fail
@@ -499,7 +499,7 @@ public class QuorumTest extends ShuffleReadWriteBase {
     try {
       report = shuffleWriteClientImpl.getShuffleResult("GRPC",
         Sets.newHashSet(shuffleServerInfo0, shuffleServerInfo1, shuffleServerInfo2),
-        testAppId, 0, 0);
+        testAppId, 0, 0, 0);
       fail(EXPECTED_EXCEPTION_MESSAGE);
     } catch (Exception e) {
       assertTrue(e.getMessage().startsWith("Get shuffle result is failed"));

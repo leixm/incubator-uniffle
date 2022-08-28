@@ -464,9 +464,9 @@ public class ShuffleWriteClientImpl implements ShuffleWriteClient {
 
   @Override
   public Roaring64NavigableMap getShuffleResult(String clientType, Set<ShuffleServerInfo> shuffleServerInfoSet,
-      String appId, int shuffleId, int partitionId) {
+      String appId, int shuffleId, int startPartition, int endPartition) {
     RssGetShuffleResultRequest request = new RssGetShuffleResultRequest(
-        appId, shuffleId, partitionId);
+        appId, shuffleId, startPartition, endPartition);
     boolean isSuccessful = false;
     Roaring64NavigableMap blockIdBitmap = Roaring64NavigableMap.bitmapOf();
     int successCnt = 0;

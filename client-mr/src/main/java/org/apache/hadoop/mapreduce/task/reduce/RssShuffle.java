@@ -174,8 +174,9 @@ public class RssShuffle<K, V> implements ShuffleConsumerPlugin<K, V>, ExceptionR
 
     // just get blockIds from RSS servers
     ShuffleWriteClient writeClient = RssMRUtils.createShuffleClient(mrJobConf);
+    int partitionId = reduceId.getTaskID().getId();
     Roaring64NavigableMap blockIdBitmap = writeClient.getShuffleResult(
-        clientType, serverInfoSet, appId, 0, reduceId.getTaskID().getId());
+        clientType, serverInfoSet, appId, 0, partitionId, partitionId);
     writeClient.close();
 
     // get map-completion events to generate RSS taskIDs

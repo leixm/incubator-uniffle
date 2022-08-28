@@ -411,8 +411,9 @@ public class FetcherTest {
     }
 
     @Override
-    public Roaring64NavigableMap getShuffleResult(String clientType, Set<ShuffleServerInfo> shuffleServerInfoSet,
-                                                  String appId, int shuffleId, int partitionId) {
+    public Roaring64NavigableMap getShuffleResult(String clientType,
+        Set<ShuffleServerInfo> shuffleServerInfoSet, String appId, int shuffleId,
+        int startPartition, int endPartition) {
       return null;
     }
 
