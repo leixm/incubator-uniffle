@@ -64,6 +64,7 @@ public class ShuffleReadClientImpl implements ShuffleReadClient {
 
   public ShuffleReadClientImpl(
       String storageType,
+      String clientType,
       String appId,
       int shuffleId,
       int partitionId,
@@ -83,6 +84,7 @@ public class ShuffleReadClientImpl implements ShuffleReadClient {
 
     CreateShuffleReadHandlerRequest request = new CreateShuffleReadHandlerRequest();
     request.setStorageType(storageType);
+    request.setClientType(clientType);
     request.setAppId(appId);
     request.setShuffleId(shuffleId);
     request.setPartitionId(partitionId);
@@ -162,27 +164,33 @@ public class ShuffleReadClientImpl implements ShuffleReadClient {
       pendingBlockIds.removeLong(bs.getBlockId());
     }
 
-    byte[] data = null;
+    //byte[] data = null;
     if (bs != null) {
-      data = new byte[bs.getLength()];
+      //data = new byte[bs.getLength()];
       long expectedCrc = -1;
       long actualCrc = -1;
       try {
         long start = System.currentTimeMillis();
-        System.arraycopy(readBuffer, bs.getOffset(), data, 0, bs.getLength());
-        copyTime.addAndGet(System.currentTimeMillis() - start);
+        //System.arraycopy(readBuffer, bs.getOffset(), data, 0, bs.getLength());
+        //copyTime.addAndGet(System.currentTimeMillis() - start);
         start = System.currentTimeMillis();
         expectedCrc = bs.getCrc();
-        actualCrc = ChecksumUtils.getCrc32(data);
+        //actualCrc = ChecksumUtils.getCrc32(data);
+        actualCrc = ChecksumUtils.getCrc32(readBuffer, bs.getOffset(), bs.getLength());
         crcCheckTime.addAndGet(System.currentTimeMillis() - start);
       } catch (Exception e) {
         LOG.warn("Can't read data for blockId[" + bs.getBlockId() + "]", e);
       }
       if (expectedCrc != actualCrc) {
+        LOG.info("colinmjj:offset:" + bs.getOffset() + ", length:" + bs.getLength()
+            + ", data:" + readBuffer.length);
         throw new RssException("Unexpected crc value for blockId[" + bs.getBlockId()
             + "], expected:" + expectedCrc + ", actual:" + actualCrc);
       }
-      return new CompressedShuffleBlock(ByteBuffer.wrap(data), bs.getUncompressLength());
+      return new CompressedShuffleBlock(ByteBuffer.wrap(readBuffer, bs.getOffset(), bs.getLength()),
+          bs.getUncompressLength());
+      //return new CompressedShuffleBlock(ByteBuffer.wrap(data),
+      //    bs.getUncompressLength());
     }
     // current segment hasn't data, try next segment
     return readShuffleBlockData();

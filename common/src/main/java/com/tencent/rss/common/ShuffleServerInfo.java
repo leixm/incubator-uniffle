@@ -23,15 +23,15 @@ import java.io.Serializable;
 public class ShuffleServerInfo implements Serializable {
 
   private String id;
-
   private String host;
+  private int grpcPort;
+  private int nettyPort;
 
-  private int port;
-
-  public ShuffleServerInfo(String id, String host, int port) {
+  public ShuffleServerInfo(String id, String host, int grpcPort, int nettyPort) {
     this.id = id;
     this.host = host;
-    this.port = port;
+    this.grpcPort = grpcPort;
+    this.nettyPort = nettyPort;
   }
 
   public String getId() {
@@ -42,8 +42,12 @@ public class ShuffleServerInfo implements Serializable {
     return host;
   }
 
-  public int getPort() {
-    return port;
+  public int getGrpcPort() {
+    return grpcPort;
+  }
+
+  public int getNettyPort() {
+    return nettyPort;
   }
 
   @Override
@@ -56,13 +60,14 @@ public class ShuffleServerInfo implements Serializable {
     if (obj instanceof ShuffleServerInfo) {
       return id.equals(((ShuffleServerInfo) obj).getId())
           && host.equals(((ShuffleServerInfo) obj).getHost())
-          && port == ((ShuffleServerInfo) obj).getPort();
+          && grpcPort == ((ShuffleServerInfo) obj).getGrpcPort();
     }
     return false;
   }
 
   @Override
   public String toString() {
-    return "ShuffleServerInfo{id[" + id + "], host[" + host + "], port[" + port + "]}";
+    return "ShuffleServerInfo{id[" + id + "], host[" + host + "], grpcPort["
+        + grpcPort + "], nettyPort[" + nettyPort + "]}";
   }
 }

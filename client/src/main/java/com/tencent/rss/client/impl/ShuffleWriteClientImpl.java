@@ -75,7 +75,8 @@ public class ShuffleWriteClientImpl implements ShuffleWriteClient {
   private CoordinatorClientFactory coordinatorClientFactory;
   private ExecutorService heartBeatExecutorService;
 
-  public ShuffleWriteClientImpl(String clientType, int retryMax, long retryIntervalMax, int heartBeatThreadNum) {
+  public ShuffleWriteClientImpl(String clientType, int retryMax, long retryIntervalMax,
+      int heartBeatThreadNum) {
     this.clientType = clientType;
     this.retryMax = retryMax;
     this.retryIntervalMax = retryIntervalMax;
@@ -84,7 +85,7 @@ public class ShuffleWriteClientImpl implements ShuffleWriteClient {
         new ThreadFactoryBuilder().setDaemon(true).setNameFormat("client-heartbeat-%d").build());
   }
 
-  private void sendShuffleDataAsync(
+  protected void sendShuffleDataAsync(
       String appId,
       Map<ShuffleServerInfo, Map<Integer, Map<Integer, List<ShuffleBlockInfo>>>> serverToBlocks,
       Map<ShuffleServerInfo, List<Long>> serverToBlockIds,

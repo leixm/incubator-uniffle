@@ -18,12 +18,19 @@
 
 package com.tencent.rss.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.apache.hadoop.conf.Configuration;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.roaringbitmap.longlong.Roaring64NavigableMap;
+
 import com.tencent.rss.client.impl.ShuffleReadClientImpl;
 import com.tencent.rss.client.impl.grpc.ShuffleServerGrpcClient;
 import com.tencent.rss.client.request.RssFinishShuffleRequest;
@@ -31,20 +38,16 @@ import com.tencent.rss.client.request.RssRegisterShuffleRequest;
 import com.tencent.rss.client.request.RssSendCommitRequest;
 import com.tencent.rss.client.request.RssSendShuffleDataRequest;
 import com.tencent.rss.client.response.CompressedShuffleBlock;
+import com.tencent.rss.client.util.ClientType;
 import com.tencent.rss.common.PartitionRange;
 import com.tencent.rss.common.ShuffleBlockInfo;
 import com.tencent.rss.coordinator.CoordinatorConf;
 import com.tencent.rss.server.ShuffleServerConf;
 import com.tencent.rss.storage.util.StorageType;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import org.apache.hadoop.conf.Configuration;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.roaringbitmap.longlong.Roaring64NavigableMap;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class ShuffleServerWithHdfsTest extends ShuffleReadWriteBase {
 
@@ -61,7 +64,7 @@ public class ShuffleServerWithHdfsTest extends ShuffleReadWriteBase {
 
   @Before
   public void createClient() {
-    shuffleServerClient = new ShuffleServerGrpcClient(LOCALHOST, SHUFFLE_SERVER_PORT);
+    shuffleServerClient = new ShuffleServerGrpcClient(LOCALHOST, SHUFFLE_SERVER_GRPC_PORT);
   }
 
   @After
@@ -97,7 +100,7 @@ public class ShuffleServerWithHdfsTest extends ShuffleReadWriteBase {
     shuffleServerClient.sendCommit(rscr);
     RssFinishShuffleRequest rfsr = new RssFinishShuffleRequest(appId, 0);
 
-    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(),
+    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(), ClientType.GRPC.name(),
         appId, 0, 0, 100, 2, 10, 1000,
         dataBasePath, bitmaps[0], Roaring64NavigableMap.bitmapOf(0), Lists.newArrayList(), new Configuration());
     assertNull(readClient.readShuffleBlockData());
@@ -126,22 +129,22 @@ public class ShuffleServerWithHdfsTest extends ShuffleReadWriteBase {
     rfsr = new RssFinishShuffleRequest(appId, 0);
     shuffleServerClient.finishShuffle(rfsr);
 
-    readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(),
+    readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(), ClientType.GRPC.name(),
         appId, 0, 0, 100, 2, 10, 1000,
         dataBasePath, bitmaps[0], Roaring64NavigableMap.bitmapOf(0), Lists.newArrayList(), new Configuration());
     validateResult(readClient, expectedData, bitmaps[0]);
 
-    readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(),
+    readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(), ClientType.GRPC.name(),
         appId, 0, 1, 100, 2, 10, 1000,
         dataBasePath, bitmaps[1], Roaring64NavigableMap.bitmapOf(1), Lists.newArrayList(), new Configuration());
     validateResult(readClient, expectedData, bitmaps[1]);
 
-    readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(),
+    readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(), ClientType.GRPC.name(),
         appId, 0, 2, 100, 2, 10, 1000,
         dataBasePath, bitmaps[2], Roaring64NavigableMap.bitmapOf(2), Lists.newArrayList(), new Configuration());
     validateResult(readClient, expectedData, bitmaps[2]);
 
-    readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(),
+    readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(), ClientType.GRPC.name(),
         appId, 0, 3, 100, 2, 10, 1000,
         dataBasePath, bitmaps[3], Roaring64NavigableMap.bitmapOf(3), Lists.newArrayList(), new Configuration());
     validateResult(readClient, expectedData, bitmaps[3]);

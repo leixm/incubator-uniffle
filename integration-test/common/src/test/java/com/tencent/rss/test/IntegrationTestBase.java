@@ -18,27 +18,27 @@
 
 package com.tencent.rss.test;
 
+import java.util.List;
+
 import com.google.common.collect.Lists;
+import org.junit.AfterClass;
+
 import com.tencent.rss.coordinator.CoordinatorConf;
 import com.tencent.rss.coordinator.CoordinatorServer;
 import com.tencent.rss.server.ShuffleServer;
 import com.tencent.rss.server.ShuffleServerConf;
 import com.tencent.rss.storage.HdfsTestBase;
 import com.tencent.rss.storage.util.StorageType;
-import org.junit.AfterClass;
-
-import java.util.List;
 
 abstract public class IntegrationTestBase extends HdfsTestBase {
 
-  protected static final int SHUFFLE_SERVER_PORT = 20001;
+  protected static int SHUFFLE_SERVER_GRPC_PORT = 20001;
+  protected static int SHUFFLE_SERVER_NETTY_PORT = 30002;
   protected static final String LOCALHOST = "127.0.0.1";
   protected static final int COORDINATOR_PORT_1 = 19999;
   protected static final int COORDINATOR_PORT_2 = 20030;
   protected static final int JETTY_PORT_1 = 19998;
-  protected static final String COORDINATOR_QUORUM =
-      LOCALHOST + ":" + COORDINATOR_PORT_1 + "," + LOCALHOST + ":" + COORDINATOR_PORT_2;
-
+  protected static final String COORDINATOR_QUORUM = LOCALHOST + ":" + COORDINATOR_PORT_1;
   protected static List<ShuffleServer> shuffleServers = Lists.newArrayList();
   protected static List<CoordinatorServer> coordinators = Lists.newArrayList();
 
@@ -73,7 +73,8 @@ abstract public class IntegrationTestBase extends HdfsTestBase {
 
   protected static ShuffleServerConf getShuffleServerConf() {
     ShuffleServerConf serverConf = new ShuffleServerConf();
-    serverConf.setInteger("rss.rpc.server.port", SHUFFLE_SERVER_PORT);
+    serverConf.setInteger("rss.rpc.server.port", SHUFFLE_SERVER_GRPC_PORT);
+    serverConf.setInteger(ShuffleServerConf.SERVER_UPLOAD_PORT, SHUFFLE_SERVER_NETTY_PORT);
     serverConf.setString("rss.storage.type", StorageType.HDFS.name());
     serverConf.setString("rss.storage.basePath", HDFS_URI + "rss/test");
     serverConf.setString("rss.server.buffer.capacity", "671088640");
@@ -83,7 +84,7 @@ abstract public class IntegrationTestBase extends HdfsTestBase {
     serverConf.setString("rss.coordinator.quorum", COORDINATOR_QUORUM);
     serverConf.setString("rss.server.heartbeat.delay", "1000");
     serverConf.setString("rss.server.heartbeat.interval", "1000");
-    serverConf.setInteger("rss.jetty.http.port", 18080);
+    serverConf.setInteger("rss.jetty.http.port", JETTY_PORT_1 + 200);
     serverConf.setInteger("rss.jetty.corePool.size", 64);
     serverConf.setInteger("rss.rpc.executor.size", 10);
     serverConf.setString("rss.server.hadoop.dfs.replication", "2");

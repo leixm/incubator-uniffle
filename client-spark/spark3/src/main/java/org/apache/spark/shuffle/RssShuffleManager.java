@@ -373,6 +373,7 @@ public class RssShuffleManager implements ShuffleManager {
         indexReadLimit,
         RssShuffleUtils.newHadoopConfiguration(sparkConf),
         storageType,
+        clientType,
         (int) readBufferSize,
         partitionNum,
         partitionToExpectBlocks,

@@ -29,6 +29,7 @@ import com.tencent.rss.common.config.RssBaseConf;
 public class CreateShuffleReadHandlerRequest {
 
   private String storageType;
+  private String clientType;
   private String appId;
   private int shuffleId;
   private int partitionId;
@@ -156,5 +157,13 @@ public class CreateShuffleReadHandlerRequest {
 
   public Roaring64NavigableMap getProcessBlockIds() {
     return processBlockIds;
+  }
+
+  public String getClientType() {
+    return clientType;
+  }
+
+  public void setClientType(String clientType) {
+    this.clientType = clientType;
   }
 }

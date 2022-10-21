@@ -33,6 +33,7 @@ import org.junit.Test;
 import org.roaringbitmap.longlong.Roaring64NavigableMap;
 import scala.Option;
 
+import com.tencent.rss.client.util.ClientType;
 import com.tencent.rss.storage.handler.impl.HdfsShuffleWriteHandler;
 import com.tencent.rss.storage.util.StorageType;
 
@@ -92,6 +93,7 @@ public class RssShuffleReaderTest extends AbstractRssReaderTest {
         1000,
         conf,
         StorageType.HDFS.name(),
+        ClientType.GRPC.name(),
         1000,
         1,
         partitionToExpectBlocks,
@@ -113,6 +115,7 @@ public class RssShuffleReaderTest extends AbstractRssReaderTest {
         1000,
         conf,
         StorageType.HDFS.name(),
+        ClientType.GRPC.name(),
         1000,
         2,
         partitionToExpectBlocks,
@@ -131,6 +134,7 @@ public class RssShuffleReaderTest extends AbstractRssReaderTest {
         1000,
         conf,
         StorageType.HDFS.name(),
+        ClientType.GRPC.name(),
         1000,
         2,
         partitionToExpectBlocks,

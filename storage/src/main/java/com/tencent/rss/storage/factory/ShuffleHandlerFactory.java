@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 
 import com.tencent.rss.client.api.ShuffleServerClient;
 import com.tencent.rss.client.factory.ShuffleServerClientFactory;
-import com.tencent.rss.client.util.ClientType;
 import com.tencent.rss.common.ShuffleServerInfo;
 import com.tencent.rss.storage.handler.api.ClientReadHandler;
 import com.tencent.rss.storage.handler.api.ServerReadHandler;
@@ -73,8 +72,8 @@ public class ShuffleHandlerFactory {
     } else if (StorageType.LOCALFILE.name().equals(request.getStorageType())) {
       List<ShuffleServerInfo> shuffleServerInfoList = request.getShuffleServerInfoList();
       List<ShuffleServerClient> shuffleServerClients = shuffleServerInfoList.stream().map(
-          ssi -> ShuffleServerClientFactory.getInstance().getShuffleServerClient(ClientType.GRPC.name(), ssi)).collect(
-          Collectors.toList());
+          ssi -> ShuffleServerClientFactory.getInstance().getShuffleServerClient(
+              request.getClientType(), ssi)).collect(Collectors.toList());
       return new LocalFileClientReadHandler(request.getAppId(), request.getShuffleId(), request.getPartitionId(),
           request.getIndexReadLimit(), request.getPartitionNumPerRange(), request.getPartitionNum(),
           request.getReadBufferSize(), shuffleServerClients);
@@ -89,8 +88,7 @@ public class ShuffleHandlerFactory {
       List<ShuffleServerInfo> shuffleServerInfoList = request.getShuffleServerInfoList();
       List<ShuffleServerClient> shuffleServerClients = shuffleServerInfoList.stream().map(
           ssi -> ShuffleServerClientFactory.getInstance().getShuffleServerClient(
-              ClientType.GRPC.name(), ssi)).collect(
-          Collectors.toList());
+              request.getClientType(), ssi)).collect(Collectors.toList());
       ClientReadHandler memoryClientReadHandler = new MemoryClientReadHandler(
           request.getAppId(),
           request.getShuffleId(),
@@ -106,8 +104,7 @@ public class ShuffleHandlerFactory {
       List<ShuffleServerInfo> shuffleServerInfoList = request.getShuffleServerInfoList();
       List<ShuffleServerClient> shuffleServerClients = shuffleServerInfoList.stream().map(
           ssi -> ShuffleServerClientFactory.getInstance().getShuffleServerClient(
-              ClientType.GRPC.name(), ssi)).collect(
-          Collectors.toList());
+              request.getClientType(), ssi)).collect(Collectors.toList());
       ClientReadHandler memoryClientReadHandler = new MemoryClientReadHandler(
           request.getAppId(),
           request.getShuffleId(),
@@ -129,8 +126,7 @@ public class ShuffleHandlerFactory {
       List<ShuffleServerInfo> shuffleServerInfoList = request.getShuffleServerInfoList();
       List<ShuffleServerClient> shuffleServerClients = shuffleServerInfoList.stream().map(
           ssi -> ShuffleServerClientFactory.getInstance().getShuffleServerClient(
-              ClientType.GRPC.name(), ssi)).collect(
-          Collectors.toList());
+              request.getClientType(), ssi)).collect(Collectors.toList());
       ClientReadHandler memoryClientReadHandler = new MemoryClientReadHandler(
           request.getAppId(),
           request.getShuffleId(),

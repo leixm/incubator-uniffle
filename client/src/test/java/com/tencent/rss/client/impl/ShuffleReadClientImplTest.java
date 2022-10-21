@@ -18,28 +18,14 @@
 
 package com.tencent.rss.client.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.any;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.tencent.rss.client.TestUtils;
-import com.tencent.rss.client.api.ShuffleReadClient;
-import com.tencent.rss.client.response.CompressedShuffleBlock;
-import com.tencent.rss.common.ShufflePartitionedBlock;
-import com.tencent.rss.common.util.ChecksumUtils;
-import com.tencent.rss.common.util.Constants;
-import com.tencent.rss.storage.HdfsTestBase;
-import com.tencent.rss.storage.handler.impl.HdfsShuffleWriteHandler;
-import com.tencent.rss.storage.util.StorageType;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
@@ -50,7 +36,21 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.roaringbitmap.longlong.LongIterator;
 import org.roaringbitmap.longlong.Roaring64NavigableMap;
+
 import com.tencent.rss.client.TestUtils;
+import com.tencent.rss.client.util.ClientType;
+import com.tencent.rss.common.ShufflePartitionedBlock;
+import com.tencent.rss.common.util.ChecksumUtils;
+import com.tencent.rss.common.util.Constants;
+import com.tencent.rss.storage.HdfsTestBase;
+import com.tencent.rss.storage.handler.impl.HdfsShuffleWriteHandler;
+import com.tencent.rss.storage.util.StorageType;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 
 public class ShuffleReadClientImplTest extends HdfsTestBase {
 
@@ -71,7 +71,8 @@ public class ShuffleReadClientImplTest extends HdfsTestBase {
     writeTestData(writeHandler, 2, 30, 0, expectedData,
         blockIdBitmap);
 
-    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(), "appId", 0, 1, 100, 1,
+    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(), ClientType.GRPC.name(),
+        "appId", 0, 1, 100, 1,
         10, 1000, basePath, blockIdBitmap, taskIdBitmap, Lists.newArrayList(), new Configuration());
 
     TestUtils.validateResult(readClient, expectedData);
@@ -80,7 +81,8 @@ public class ShuffleReadClientImplTest extends HdfsTestBase {
 
     blockIdBitmap.addLong(Constants.MAX_TASK_ATTEMPT_ID - 1);
     taskIdBitmap.addLong(Constants.MAX_TASK_ATTEMPT_ID - 1);
-    readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(), "appId", 0, 1, 100, 1,
+    readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(), ClientType.GRPC.name(),
+        "appId", 0, 1, 100, 1,
         10, 1000, basePath, blockIdBitmap, taskIdBitmap, Lists.newArrayList(), new Configuration());
     TestUtils.validateResult(readClient, expectedData);
     try {
@@ -108,7 +110,7 @@ public class ShuffleReadClientImplTest extends HdfsTestBase {
     writeTestData(writeHandler1, 2, 30, 0, expectedData, blockIdBitmap);
     writeTestData(writeHandler2, 2, 30, 0, expectedData, blockIdBitmap);
 
-    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(),
+    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(), ClientType.GRPC.name(),
         "appId", 0, 1, 100, 2, 10, 1000,
         basePath, blockIdBitmap, taskIdBitmap, Lists.newArrayList(), new Configuration());
 
@@ -142,7 +144,7 @@ public class ShuffleReadClientImplTest extends HdfsTestBase {
     FileUtil.copy(fs, new Path(shuffleFolder + "/test3_2_0.index"), fs,
         new Path(basePath + "/test3_2.cp.index"), false, conf);
 
-    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(),
+    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(), ClientType.GRPC.name(),
         "appId", 0, 1, 100, 2, 10, 1000,
         basePath, blockIdBitmap, taskIdBitmap, Lists.newArrayList(), new Configuration());
 
@@ -162,7 +164,7 @@ public class ShuffleReadClientImplTest extends HdfsTestBase {
     Roaring64NavigableMap taskIdBitmap = Roaring64NavigableMap.bitmapOf(0);
     writeTestData(writeHandler, 2, 30, 0, expectedData, blockIdBitmap);
 
-    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(),
+    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(), ClientType.GRPC.name(),
         "appId", 0, 1, 100, 2, 10, 1000,
         basePath, blockIdBitmap, taskIdBitmap, Lists.newArrayList(), new Configuration());
     Path dataFile = new Path(basePath + "/appId/0/0-1/test1_0.data");
@@ -198,7 +200,7 @@ public class ShuffleReadClientImplTest extends HdfsTestBase {
     Roaring64NavigableMap taskIdBitmap = Roaring64NavigableMap.bitmapOf(0);
     writeTestData(writeHandler, 2, 30, 0, expectedData, blockIdBitmap);
 
-    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(),
+    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(), ClientType.GRPC.name(),
         "appId", 0, 1, 100, 2, 10, 1000,
         basePath, blockIdBitmap, taskIdBitmap, Lists.newArrayList(), new Configuration());
     // index file is deleted after iterator initialization, it should be ok, all index infos are read already
@@ -226,10 +228,10 @@ public class ShuffleReadClientImplTest extends HdfsTestBase {
 
     writeTestData(writeHandler, 10, 30, 0, expectedData1, blockIdBitmap1);
 
-    ShuffleReadClientImpl readClient1 = new ShuffleReadClientImpl(StorageType.HDFS.name(),
+    ShuffleReadClientImpl readClient1 = new ShuffleReadClientImpl(StorageType.HDFS.name(), ClientType.GRPC.name(),
         "appId", 0, 0, 100, 2, 10, 100,
         basePath, blockIdBitmap1, taskIdBitmap, Lists.newArrayList(), new Configuration());
-    ShuffleReadClientImpl readClient2 = new ShuffleReadClientImpl(StorageType.HDFS.name(),
+    ShuffleReadClientImpl readClient2 = new ShuffleReadClientImpl(StorageType.HDFS.name(), ClientType.GRPC.name(),
         "appId", 0, 1, 100, 2, 10, 100,
         basePath, blockIdBitmap2, taskIdBitmap, Lists.newArrayList(), new Configuration());
     TestUtils.validateResult(readClient1, expectedData1);
@@ -252,7 +254,7 @@ public class ShuffleReadClientImplTest extends HdfsTestBase {
     Roaring64NavigableMap taskIdBitmap = Roaring64NavigableMap.bitmapOf(0);
     writeTestData(writeHandler, 2, 30, 0, expectedData, blockIdBitmap);
 
-    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(),
+    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(), ClientType.GRPC.name(),
         "appId", 0, 1, 100, 2, 10, 1000,
         basePath, blockIdBitmap, taskIdBitmap, Lists.newArrayList(), new Configuration());
     // crc32 is incorrect
@@ -274,7 +276,7 @@ public class ShuffleReadClientImplTest extends HdfsTestBase {
   @Test
   public void readTest9() {
     // empty data
-    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(),
+    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(), ClientType.GRPC.name(),
         "appId", 0, 1, 100, 2, 10, 1000,
         "basePath", Roaring64NavigableMap.bitmapOf(), Roaring64NavigableMap.bitmapOf(),
         Lists.newArrayList(), new Configuration());
@@ -298,7 +300,7 @@ public class ShuffleReadClientImplTest extends HdfsTestBase {
       wrongBlockIdBitmap.addLong(iter.next() + (1 << Constants.TASK_ATTEMPT_ID_MAX_LENGTH));
     }
 
-    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(),
+    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(), ClientType.GRPC.name(),
         "appId", 0, 0, 100, 2, 10, 100,
         basePath, wrongBlockIdBitmap, taskIdBitmap, Lists.newArrayList(), new Configuration());
     assertNull(readClient.readShuffleBlockData());
@@ -322,35 +324,40 @@ public class ShuffleReadClientImplTest extends HdfsTestBase {
     writeTestData(writeHandler, 10, 30, 0, expectedData, blockIdBitmap);
 
     // test with different indexReadLimit to validate result
-    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(), "appId", 0, 1, 1, 1,
+    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(), ClientType.GRPC.name(),
+        "appId", 0, 1, 1, 1,
         10, 1000, basePath, blockIdBitmap, taskIdBitmap, Lists.newArrayList(), new Configuration());
 
     TestUtils.validateResult(readClient, expectedData);
     readClient.checkProcessedBlockIds();
     readClient.close();
 
-    readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(), "appId", 0, 1, 2, 1,
+    readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(), ClientType.GRPC.name(),
+        "appId", 0, 1, 2, 1,
         10, 1000, basePath, blockIdBitmap, taskIdBitmap, Lists.newArrayList(), new Configuration());
 
     TestUtils.validateResult(readClient, expectedData);
     readClient.checkProcessedBlockIds();
     readClient.close();
 
-    readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(), "appId", 0, 1, 3, 1,
+    readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(), ClientType.GRPC.name(),
+        "appId", 0, 1, 3, 1,
         10, 1000, basePath, blockIdBitmap, taskIdBitmap, Lists.newArrayList(), new Configuration());
 
     TestUtils.validateResult(readClient, expectedData);
     readClient.checkProcessedBlockIds();
     readClient.close();
 
-    readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(), "appId", 0, 1, 10, 1,
+    readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(), ClientType.GRPC.name(),
+        "appId", 0, 1, 10, 1,
         10, 1000, basePath, blockIdBitmap, taskIdBitmap, Lists.newArrayList(), new Configuration());
 
     TestUtils.validateResult(readClient, expectedData);
     readClient.checkProcessedBlockIds();
     readClient.close();
 
-    readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(), "appId", 0, 1, 11, 1,
+    readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(), ClientType.GRPC.name(),
+        "appId", 0, 1, 11, 1,
         10, 1000, basePath, blockIdBitmap, taskIdBitmap, Lists.newArrayList(), new Configuration());
 
     TestUtils.validateResult(readClient, expectedData);
@@ -372,7 +379,8 @@ public class ShuffleReadClientImplTest extends HdfsTestBase {
     writeTestData(writeHandler, 5, 30, 1, expectedData, blockIdBitmap);
 
     // unexpected taskAttemptId should be filtered
-    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(), "appId", 0, 1, 100, 1,
+    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(), ClientType.GRPC.name(),
+        "appId", 0, 1, 100, 1,
         10, 1000, basePath, blockIdBitmap, taskIdBitmap, Lists.newArrayList(), new Configuration());
 
     TestUtils.validateResult(readClient, expectedData);
@@ -398,7 +406,8 @@ public class ShuffleReadClientImplTest extends HdfsTestBase {
     writeTestData(writeHandler, 5, 30, 3, expectedData, blockIdBitmap);
 
     // unexpected taskAttemptId should be filtered
-    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(), "appId", 0, 1, 100, 1,
+    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(), ClientType.GRPC.name(),
+        "appId", 0, 1, 100, 1,
         10, 1000, basePath, blockIdBitmap, taskIdBitmap, Lists.newArrayList(), new Configuration());
 
     TestUtils.validateResult(readClient, expectedData);
@@ -421,7 +430,8 @@ public class ShuffleReadClientImplTest extends HdfsTestBase {
     writeTestData(writeHandler, 5, 30, 2, expectedData, blockIdBitmap);
 
     // unexpected taskAttemptId should be filtered
-    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(), "appId", 0, 1, 100, 1,
+    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(), ClientType.GRPC.name(),
+        "appId", 0, 1, 100, 1,
         10, 1000, basePath, blockIdBitmap, taskIdBitmap, Lists.newArrayList(), new Configuration());
 
     TestUtils.validateResult(readClient, expectedData);
@@ -446,7 +456,8 @@ public class ShuffleReadClientImplTest extends HdfsTestBase {
     writeTestData(writeHandler, 5, 30, 0, expectedData, blockIdBitmap);
     writeTestData(writeHandler, 5, 30, 0, Maps.newHashMap(), Roaring64NavigableMap.bitmapOf());
     // unexpected taskAttemptId should be filtered
-    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(), "appId", 0, 1, 100, 1,
+    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.HDFS.name(), ClientType.GRPC.name(),
+        "appId", 0, 1, 100, 1,
       10, 1000, basePath, blockIdBitmap, taskIdBitmap, Lists.newArrayList(), new Configuration());
 
     TestUtils.validateResult(readClient, expectedData);

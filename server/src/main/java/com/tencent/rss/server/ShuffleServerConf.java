@@ -313,6 +313,54 @@ public class ShuffleServerConf extends RssBaseConf {
       .defaultValue(75.0)
       .withDescription("HighWaterMark of memory in percentage style");
 
+  public static final ConfigOption<Boolean> SERVER_UPLOAD_ENABLE = ConfigOptions
+      .key("rss.server.upload.enable")
+      .booleanType()
+      .defaultValue(false)
+      .withDescription("If enable upload data with netty server");
+
+  public static final ConfigOption<Boolean> SERVER_UPLOAD_EPOLL_ENABLE = ConfigOptions
+      .key("rss.server.upload.epoll.enable")
+      .booleanType()
+      .defaultValue(false)
+      .withDescription("If enable epoll model with netty server");
+
+  public static final ConfigOption<Integer> SERVER_UPLOAD_ACCEPT_THREAD = ConfigOptions
+      .key("rss.server.upload.accept.thread")
+      .intType()
+      .defaultValue(200)
+      .withDescription("Accept thread count in netty");
+
+  public static final ConfigOption<Integer> SERVER_UPLOAD_WORKER_THREAD = ConfigOptions
+      .key("rss.server.upload.worker.thread")
+      .intType()
+      .defaultValue(200)
+      .withDescription("Worker thread count in netty");
+
+  public static final ConfigOption<Long> SERVER_NETTY_HANDLER_IDLE_TIMEOUT = ConfigOptions
+      .key("rss.server.netty.handler.idle.timeout")
+      .longType()
+      .defaultValue(60000L)
+      .withDescription("Idle timeout if there has not data");
+
+  public static final ConfigOption<Integer> SERVER_UPLOAD_CONNECT_BACKLOG = ConfigOptions
+      .key("rss.server.upload.connect.backlog")
+      .intType()
+      .defaultValue(1000)
+      .withDescription("Backlog for connection in netty");
+
+  public static final ConfigOption<Integer> SERVER_UPLOAD_CONNECT_TIMEOUT = ConfigOptions
+      .key("rss.server.upload.connect.timeout")
+      .intType()
+      .defaultValue(5000)
+      .withDescription("Timeout for connection in netty");
+
+  public static final ConfigOption<Integer> SERVER_UPLOAD_PORT = ConfigOptions
+      .key("rss.server.upload.port")
+      .intType()
+      .defaultValue(29999)
+      .withDescription("Port of netty server for upload data");
+
   public ShuffleServerConf() {
   }
 
@@ -341,6 +389,38 @@ public class ShuffleServerConf extends RssBaseConf {
           set(config, ConfigUtils.convertValue(v, config.getClazz()));
         }
       });
+
+      if (SERVER_UPLOAD_EPOLL_ENABLE.key().equalsIgnoreCase(k)) {
+        set(SERVER_UPLOAD_EPOLL_ENABLE, Boolean.valueOf(v));
+      }
+
+      if (SERVER_UPLOAD_ACCEPT_THREAD.key().equalsIgnoreCase(k)) {
+        set(SERVER_UPLOAD_ACCEPT_THREAD, Integer.valueOf(v));
+      }
+
+      if (SERVER_UPLOAD_WORKER_THREAD.key().equalsIgnoreCase(k)) {
+        set(SERVER_UPLOAD_WORKER_THREAD, Integer.valueOf(v));
+      }
+
+      if (SERVER_NETTY_HANDLER_IDLE_TIMEOUT.key().equalsIgnoreCase(k)) {
+        set(SERVER_NETTY_HANDLER_IDLE_TIMEOUT, Long.valueOf(v));
+      }
+
+      if (SERVER_UPLOAD_CONNECT_BACKLOG.key().equalsIgnoreCase(k)) {
+        set(SERVER_UPLOAD_CONNECT_BACKLOG, Integer.valueOf(v));
+      }
+
+      if (SERVER_UPLOAD_CONNECT_TIMEOUT.key().equalsIgnoreCase(k)) {
+        set(SERVER_UPLOAD_CONNECT_TIMEOUT, Integer.valueOf(v));
+      }
+
+      if (SERVER_UPLOAD_PORT.key().equalsIgnoreCase(k)) {
+        set(SERVER_UPLOAD_PORT, Integer.valueOf(v));
+      }
+
+      if (SERVER_UPLOAD_ENABLE.key().equalsIgnoreCase(k)) {
+        set(SERVER_UPLOAD_ENABLE, Boolean.valueOf(v));
+      }
 
       if (k.startsWith(PREFIX_HADOOP_CONF)) {
         setString(k, v);

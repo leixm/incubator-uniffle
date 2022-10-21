@@ -18,10 +18,21 @@
 
 package com.tencent.rss.test;
 
+import java.io.File;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.roaringbitmap.longlong.Roaring64NavigableMap;
+
 import com.tencent.rss.client.api.ShuffleWriteClient;
 import com.tencent.rss.client.factory.ShuffleClientFactory;
 import com.tencent.rss.client.impl.grpc.ShuffleServerGrpcClient;
@@ -47,16 +58,6 @@ import com.tencent.rss.coordinator.CoordinatorConf;
 import com.tencent.rss.server.ShuffleServerConf;
 import com.tencent.rss.server.ShuffleServerGrpcMetrics;
 import com.tencent.rss.storage.util.StorageType;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.roaringbitmap.longlong.Roaring64NavigableMap;
-
-import java.io.File;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -87,7 +88,7 @@ public class ShuffleServerGrpcTest extends IntegrationTestBase {
 
   @Before
   public void createClient() {
-    shuffleServerClient = new ShuffleServerGrpcClient(LOCALHOST, SHUFFLE_SERVER_PORT);
+    shuffleServerClient = new ShuffleServerGrpcClient(LOCALHOST, SHUFFLE_SERVER_GRPC_PORT);
   }
 
   @Test
@@ -97,7 +98,7 @@ public class ShuffleServerGrpcTest extends IntegrationTestBase {
             "GRPC", 2, 10000L, 4);
     shuffleWriteClient.registerCoordinators("127.0.0.1:19999");
     shuffleWriteClient.registerShuffle(
-        new ShuffleServerInfo("127.0.0.1-20001", "127.0.0.1", 20001),
+        new ShuffleServerInfo("127.0.0.1-20001", "127.0.0.1", SHUFFLE_SERVER_GRPC_PORT, SHUFFLE_SERVER_NETTY_PORT),
         "clearResourceTest1",
         0,
         Lists.newArrayList(new PartitionRange(0, 1)));

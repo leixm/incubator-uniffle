@@ -18,14 +18,15 @@
 
 package com.tencent.rss.test;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.Map;
+
 import org.apache.spark.SparkConf;
 import org.apache.spark.shuffle.RssClientConfig;
 import org.apache.spark.sql.SparkSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.junit.Assert.assertEquals;
 
 public abstract class SparkIntegrationTestBase extends IntegrationTestBase {
 

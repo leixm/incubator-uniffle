@@ -18,23 +18,13 @@
 
 package com.tencent.rss.test;
 
+import java.io.File;
+import java.util.List;
+import java.util.Map;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.Files;
-import com.tencent.rss.client.impl.ShuffleReadClientImpl;
-import com.tencent.rss.client.impl.grpc.ShuffleServerGrpcClient;
-import com.tencent.rss.client.request.RssFinishShuffleRequest;
-import com.tencent.rss.client.request.RssRegisterShuffleRequest;
-import com.tencent.rss.client.request.RssSendCommitRequest;
-import com.tencent.rss.client.request.RssSendShuffleDataRequest;
-import com.tencent.rss.common.PartitionRange;
-import com.tencent.rss.common.ShuffleBlockInfo;
-import com.tencent.rss.common.ShuffleServerInfo;
-import com.tencent.rss.common.util.Constants;
-import com.tencent.rss.common.util.RssUtils;
-import com.tencent.rss.coordinator.CoordinatorConf;
-import com.tencent.rss.server.ShuffleServerConf;
-import com.tencent.rss.storage.util.StorageType;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -43,9 +33,21 @@ import org.junit.Test;
 import org.roaringbitmap.longlong.LongIterator;
 import org.roaringbitmap.longlong.Roaring64NavigableMap;
 
-import java.io.File;
-import java.util.List;
-import java.util.Map;
+import com.tencent.rss.client.impl.ShuffleReadClientImpl;
+import com.tencent.rss.client.impl.grpc.ShuffleServerGrpcClient;
+import com.tencent.rss.client.request.RssFinishShuffleRequest;
+import com.tencent.rss.client.request.RssRegisterShuffleRequest;
+import com.tencent.rss.client.request.RssSendCommitRequest;
+import com.tencent.rss.client.request.RssSendShuffleDataRequest;
+import com.tencent.rss.client.util.ClientType;
+import com.tencent.rss.common.PartitionRange;
+import com.tencent.rss.common.ShuffleBlockInfo;
+import com.tencent.rss.common.ShuffleServerInfo;
+import com.tencent.rss.common.util.Constants;
+import com.tencent.rss.common.util.RssUtils;
+import com.tencent.rss.coordinator.CoordinatorConf;
+import com.tencent.rss.server.ShuffleServerConf;
+import com.tencent.rss.storage.util.StorageType;
 
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -58,7 +60,8 @@ public class SparkClientWithLocalTest extends ShuffleReadWriteBase {
   private static File DATA_DIR2;
   private ShuffleServerGrpcClient shuffleServerClient;
   private List<ShuffleServerInfo> shuffleServerInfo =
-      Lists.newArrayList(new ShuffleServerInfo("127.0.0.1-20001", LOCALHOST, SHUFFLE_SERVER_PORT));
+      Lists.newArrayList(new ShuffleServerInfo("127.0.0.1-20001", LOCALHOST,
+          SHUFFLE_SERVER_GRPC_PORT, SHUFFLE_SERVER_NETTY_PORT));
 
   @BeforeClass
   public static void setupServers() throws Exception {
@@ -77,7 +80,8 @@ public class SparkClientWithLocalTest extends ShuffleReadWriteBase {
 
   @Before
   public void createClient() {
-    shuffleServerClient = new ShuffleServerGrpcClient(LOCALHOST, SHUFFLE_SERVER_PORT);
+    shuffleServerClient = new ShuffleServerGrpcClient(LOCALHOST,
+        SHUFFLE_SERVER_GRPC_PORT, SHUFFLE_SERVER_NETTY_PORT);
   }
 
   @After
@@ -95,7 +99,8 @@ public class SparkClientWithLocalTest extends ShuffleReadWriteBase {
     createTestData(testAppId, expectedData, blockIdBitmap, taskIdBitmap);
     blockIdBitmap.addLong((1 << Constants.TASK_ATTEMPT_ID_MAX_LENGTH));
     ShuffleReadClientImpl readClient;
-    readClient = new ShuffleReadClientImpl(StorageType.LOCALFILE.name(), testAppId, 0, 0, 100, 1,
+    readClient = new ShuffleReadClientImpl(StorageType.LOCALFILE.name(),  ClientType.GRPC.name(),
+        testAppId, 0, 0, 100, 1,
         10, 1000, "", blockIdBitmap, taskIdBitmap, shuffleServerInfo, null);
     validateResult(readClient, expectedData);
     try {
@@ -125,7 +130,7 @@ public class SparkClientWithLocalTest extends ShuffleReadWriteBase {
         0, 0, 0, 2, 30, blockIdBitmap, expectedData, mockSSI);
     sendTestData(testAppId, blocks);
 
-    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.LOCALFILE.name(),
+    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.LOCALFILE.name(), ClientType.GRPC.name(),
         testAppId, 0, 0, 100, 1, 10, 1000,
         "", blockIdBitmap, taskIdBitmap, shuffleServerInfo, null);
 
@@ -146,7 +151,7 @@ public class SparkClientWithLocalTest extends ShuffleReadWriteBase {
         0, 0, 0, 2, 30, blockIdBitmap, expectedData, mockSSI);
     sendTestData(testAppId, blocks);
 
-    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.LOCALFILE.name(),
+    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.LOCALFILE.name(), ClientType.GRPC.name(),
         testAppId, 0, 0, 100, 1, 10, 1000,
         "", blockIdBitmap, taskIdBitmap, shuffleServerInfo, null);
     FileUtils.deleteDirectory(new File(DATA_DIR1.getAbsolutePath() + "/" + testAppId + "/0/0-0"));
@@ -185,10 +190,10 @@ public class SparkClientWithLocalTest extends ShuffleReadWriteBase {
         0, 0, 0, 10, 30, blockIdBitmap1, expectedData1, mockSSI);
     sendTestData(testAppId, blocks);
 
-    ShuffleReadClientImpl readClient1 = new ShuffleReadClientImpl(StorageType.LOCALFILE.name(),
+    ShuffleReadClientImpl readClient1 = new ShuffleReadClientImpl(StorageType.LOCALFILE.name(), ClientType.GRPC.name(),
         testAppId, 0, 0, 100, 2, 10, 100,
         "", blockIdBitmap1, taskIdBitmap, shuffleServerInfo, null);
-    ShuffleReadClientImpl readClient2 = new ShuffleReadClientImpl(StorageType.LOCALFILE.name(),
+    ShuffleReadClientImpl readClient2 = new ShuffleReadClientImpl(StorageType.LOCALFILE.name(), ClientType.GRPC.name(),
         testAppId, 0, 1, 100, 2, 10, 100,
         "", blockIdBitmap2, taskIdBitmap, shuffleServerInfo, null);
     validateResult(readClient1, expectedData1);
@@ -203,7 +208,7 @@ public class SparkClientWithLocalTest extends ShuffleReadWriteBase {
   @Test
   public void readTest5() {
     String testAppId = "localReadTest5";
-    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.LOCALFILE.name(),
+    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.LOCALFILE.name(), ClientType.GRPC.name(),
         testAppId, 0, 1, 100, 2, 10, 1000,
         "", Roaring64NavigableMap.bitmapOf(), Roaring64NavigableMap.bitmapOf(),
         shuffleServerInfo, null);
@@ -229,7 +234,7 @@ public class SparkClientWithLocalTest extends ShuffleReadWriteBase {
       wrongBlockIdBitmap.addLong(iter.next() + (1 << Constants.TASK_ATTEMPT_ID_MAX_LENGTH));
     }
 
-    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.LOCALFILE.name(),
+    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.LOCALFILE.name(), ClientType.GRPC.name(),
         testAppId, 0, 0, 100, 1, 10, 100,
         "", wrongBlockIdBitmap, taskIdBitmap, shuffleServerInfo, null);
     assertNull(readClient.readShuffleBlockData());
@@ -263,7 +268,8 @@ public class SparkClientWithLocalTest extends ShuffleReadWriteBase {
     sendTestData(testAppId, blocks);
 
     // unexpected taskAttemptId should be filtered
-    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.LOCALFILE.name(), testAppId, 0, 0, 100, 1,
+    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.LOCALFILE.name(),
+        ClientType.GRPC.name(), testAppId, 0, 0, 100, 1,
         10, 1000, "", blockIdBitmap, taskIdBitmap, shuffleServerInfo, null);
 
     validateResult(readClient, expectedData);
@@ -297,7 +303,8 @@ public class SparkClientWithLocalTest extends ShuffleReadWriteBase {
     sendTestData(testAppId, blocks);
 
     // unexpected taskAttemptId should be filtered
-    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.LOCALFILE.name(), testAppId, 0, 0, 100, 1,
+    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.LOCALFILE.name(),
+        ClientType.GRPC.name(), testAppId, 0, 0, 100, 1,
         10, 1000, "", blockIdBitmap, taskIdBitmap, shuffleServerInfo, null);
 
     validateResult(readClient, expectedData);
@@ -323,7 +330,8 @@ public class SparkClientWithLocalTest extends ShuffleReadWriteBase {
         0, 0, 1, 3, 25, blockIdBitmap, Maps.newHashMap(), mockSSI);
     sendTestData(testAppId, blocks);
     // test with un-changed expected blockId
-    readClient = new ShuffleReadClientImpl(StorageType.LOCALFILE.name(), testAppId, 0, 0, 100, 1,
+    readClient = new ShuffleReadClientImpl(StorageType.LOCALFILE.name(), ClientType.GRPC.name(),
+        testAppId, 0, 0, 100, 1,
         10, 1000, "", beforeAdded, taskIdBitmap,
         shuffleServerInfo, null);
     validateResult(readClient, expectedData);
@@ -331,7 +339,8 @@ public class SparkClientWithLocalTest extends ShuffleReadWriteBase {
     readClient.close();
 
     // test with changed expected blockId
-    readClient = new ShuffleReadClientImpl(StorageType.LOCALFILE.name(), testAppId, 0, 0, 100, 1,
+    readClient = new ShuffleReadClientImpl(StorageType.LOCALFILE.name(), ClientType.GRPC.name(),
+        testAppId, 0, 0, 100, 1,
         10, 1000, "", blockIdBitmap, taskIdBitmap,
         shuffleServerInfo, null);
     validateResult(readClient, expectedData);
@@ -371,6 +380,7 @@ public class SparkClientWithLocalTest extends ShuffleReadWriteBase {
 
     ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(
         StorageType.LOCALFILE.name(),
+        ClientType.GRPC.name(),
         testAppId,
         0,
         0,

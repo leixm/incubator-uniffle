@@ -36,15 +36,18 @@ public class ShuffleClientFactory {
   }
 
   public ShuffleWriteClient createShuffleWriteClient(
-      String clientType, int retryMax, long retryIntervalMax, int heartBeatThreadNum) {
-    return new ShuffleWriteClientImpl(clientType, retryMax, retryIntervalMax, heartBeatThreadNum);
+      String clientType, int retryMax, long retryIntervalMax,
+      int heartBeatThreadNum) {
+    return new ShuffleWriteClientImpl(clientType, retryMax,
+        retryIntervalMax, heartBeatThreadNum);
   }
 
   public ShuffleReadClient createShuffleReadClient(CreateShuffleReadClientRequest request) {
-    return new ShuffleReadClientImpl(request.getStorageType(), request.getAppId(), request.getShuffleId(),
-        request.getPartitionId(), request.getIndexReadLimit(), request.getPartitionNumPerRange(),
-        request.getPartitionNum(), request.getReadBufferSize(), request.getBasePath(),
-        request.getBlockIdBitmap(), request.getTaskIdBitmap(), request.getShuffleServerInfoList(),
-        request.getHadoopConf());
+    return new ShuffleReadClientImpl(request.getStorageType(), request.getClientType(),
+        request.getAppId(), request.getShuffleId(), request.getPartitionId(),
+        request.getIndexReadLimit(), request.getPartitionNumPerRange(),
+        request.getPartitionNum(), request.getReadBufferSize(),
+        request.getBasePath(), request.getBlockIdBitmap(), request.getTaskIdBitmap(),
+        request.getShuffleServerInfoList(), request.getHadoopConf());
   }
 }

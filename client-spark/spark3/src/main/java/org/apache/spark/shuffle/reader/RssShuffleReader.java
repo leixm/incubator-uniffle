@@ -67,6 +67,7 @@ public class RssShuffleReader<K, C> implements ShuffleReader<K, C> {
   private int readBufferSize;
   private int partitionNum;
   private String storageType;
+  private String clientType;
   private Map<Integer, Roaring64NavigableMap> partitionToExpectBlocks;
   private Roaring64NavigableMap taskIdBitmap;
   private Configuration hadoopConf;
@@ -85,6 +86,7 @@ public class RssShuffleReader<K, C> implements ShuffleReader<K, C> {
       int indexReadLimit,
       Configuration hadoopConf,
       String storageType,
+      String clientType,
       int readBufferSize,
       int partitionNum,
       Map<Integer, Roaring64NavigableMap> partitionToExpectBlocks,
@@ -103,6 +105,7 @@ public class RssShuffleReader<K, C> implements ShuffleReader<K, C> {
     this.basePath = basePath;
     this.indexReadLimit = indexReadLimit;
     this.storageType = storageType;
+    this.clientType = clientType;
     this.readBufferSize = readBufferSize;
     this.partitionNum = partitionNum;
     this.partitionToExpectBlocks = partitionToExpectBlocks;
@@ -190,7 +193,7 @@ public class RssShuffleReader<K, C> implements ShuffleReader<K, C> {
         }
         List<ShuffleServerInfo> shuffleServerInfoList = partitionToShuffleServers.get(partition);
         CreateShuffleReadClientRequest request = new CreateShuffleReadClientRequest(
-            appId, shuffleId, partition, storageType, basePath, indexReadLimit, readBufferSize,
+            appId, shuffleId, partition, storageType, clientType, basePath, indexReadLimit, readBufferSize,
             1, partitionNum, partitionToExpectBlocks.get(partition), taskIdBitmap, shuffleServerInfoList, hadoopConf);
         ShuffleReadClient shuffleReadClient = ShuffleClientFactory.getInstance().createShuffleReadClient(request);
         RssShuffleDataIterator iterator = new RssShuffleDataIterator<K, C>(

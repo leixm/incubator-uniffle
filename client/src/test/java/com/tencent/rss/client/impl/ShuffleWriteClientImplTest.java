@@ -50,7 +50,7 @@ public class ShuffleWriteClientImplTest {
         new RssSendShuffleDataResponse(ResponseStatusCode.NO_BUFFER));
 
     List<ShuffleServerInfo> shuffleServerInfoList =
-        Lists.newArrayList(new ShuffleServerInfo("id", "host", 0));
+        Lists.newArrayList(new ShuffleServerInfo("id", "host", 0, 0));
     List<ShuffleBlockInfo> shuffleBlockInfoList = Lists.newArrayList(new ShuffleBlockInfo(
         0, 0, 10, 10, 10, new byte[]{1}, shuffleServerInfoList, 10, 100, 0));
     SendShuffleDataResult result = spyClient.sendShuffleData("appId", shuffleBlockInfoList);

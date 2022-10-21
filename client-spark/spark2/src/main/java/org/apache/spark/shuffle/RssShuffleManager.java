@@ -136,7 +136,8 @@ public class RssShuffleManager implements ShuffleManager {
         RssClientConfig.RSS_CLIENT_HEARTBEAT_THREAD_NUM_DEFAULT_VALUE);
     shuffleWriteClient = ShuffleClientFactory
         .getInstance()
-        .createShuffleWriteClient(clientType, retryMax, retryIntervalMax, heartBeatThreadNum);
+        .createShuffleWriteClient(clientType, retryMax,
+            retryIntervalMax, heartBeatThreadNum);
     registerCoordinator();
     if (!sparkConf.getBoolean(RssClientConfig.RSS_TEST_FLAG, false)) {
       // for non-driver executor, start a thread for sending shuffle data to shuffle server
@@ -293,7 +294,7 @@ public class RssShuffleManager implements ShuffleManager {
       return new RssShuffleReader<K, C>(startPartition, endPartition, context,
           rssShuffleHandle, shuffleDataBasePath, indexReadLimit,
           RssShuffleUtils.newHadoopConfiguration(sparkConf),
-          storageType, (int) readBufferSize, partitionNumPerRange, partitionNum,
+          storageType, clientType, (int) readBufferSize, partitionNumPerRange, partitionNum,
           blockIdBitmap, taskIdBitmap);
     } else {
       throw new RuntimeException("Unexpected ShuffleHandle:" + handle.getClass().getName());

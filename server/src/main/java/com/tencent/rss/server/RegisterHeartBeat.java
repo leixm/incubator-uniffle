@@ -72,7 +72,8 @@ public class RegisterHeartBeat {
         sendHeartBeat(
             shuffleServer.getId(),
             shuffleServer.getIp(),
-            shuffleServer.getPort(),
+            shuffleServer.getGrpcPort(),
+            shuffleServer.getNettyPort(),
             shuffleServer.getUsedMemory(),
             shuffleServer.getPreAllocatedMemory(),
             shuffleServer.getAvailableMemory(),
@@ -90,7 +91,8 @@ public class RegisterHeartBeat {
   boolean sendHeartBeat(
       String id,
       String ip,
-      int port,
+      int grpcPort,
+      int nettyPort,
       long usedMemory,
       long preAllocatedMemory,
       long availableMemory,
@@ -101,7 +103,8 @@ public class RegisterHeartBeat {
     RssSendHeartBeatRequest request = new RssSendHeartBeatRequest(
         id,
         ip,
-        port,
+        grpcPort,
+        nettyPort,
         usedMemory,
         preAllocatedMemory,
         availableMemory,

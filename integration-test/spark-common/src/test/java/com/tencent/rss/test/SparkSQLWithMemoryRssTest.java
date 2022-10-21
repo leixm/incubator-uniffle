@@ -18,15 +18,17 @@
 
 package com.tencent.rss.test;
 
+import java.io.File;
+
 import com.google.common.io.Files;
-import com.tencent.rss.coordinator.CoordinatorConf;
-import com.tencent.rss.server.ShuffleServerConf;
-import com.tencent.rss.storage.util.StorageType;
 import org.apache.spark.SparkConf;
 import org.apache.spark.shuffle.RssClientConfig;
 import org.junit.BeforeClass;
 
-import java.io.File;
+import com.tencent.rss.client.util.ClientType;
+import com.tencent.rss.coordinator.CoordinatorConf;
+import com.tencent.rss.server.ShuffleServerConf;
+import com.tencent.rss.storage.util.StorageType;
 
 public class SparkSQLWithMemoryRssTest extends SparkSQLTest {
 
@@ -53,6 +55,7 @@ public class SparkSQLWithMemoryRssTest extends SparkSQLTest {
   @Override
   public void updateRssStorage(SparkConf sparkConf) {
     sparkConf.set(RssClientConfig.RSS_STORAGE_TYPE, StorageType.MEMORY_LOCALFILE.name());
+    sparkConf.set(RssClientConfig.RSS_CLIENT_TYPE, ClientType.GRPC_NETTY.name());
   }
 
   @Override

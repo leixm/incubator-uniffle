@@ -179,6 +179,7 @@ public class PartitionBalanceAssignmentStrategyTest {
           String.valueOf((char)('a' + i)),
           "",
           0,
+          0,
           10L,
           5L,
           resources.get(i),

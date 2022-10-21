@@ -18,10 +18,24 @@
 
 package com.tencent.rss.test;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Uninterruptibles;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.roaringbitmap.longlong.Roaring64NavigableMap;
+
 import com.tencent.rss.client.impl.ShuffleReadClientImpl;
 import com.tencent.rss.client.impl.grpc.ShuffleServerGrpcClient;
 import com.tencent.rss.client.request.RssAppHeartBeatRequest;
@@ -32,6 +46,7 @@ import com.tencent.rss.client.request.RssReportShuffleResultRequest;
 import com.tencent.rss.client.request.RssSendCommitRequest;
 import com.tencent.rss.client.request.RssSendShuffleDataRequest;
 import com.tencent.rss.client.response.CompressedShuffleBlock;
+import com.tencent.rss.client.util.ClientType;
 import com.tencent.rss.common.BufferSegment;
 import com.tencent.rss.common.PartitionRange;
 import com.tencent.rss.common.ShuffleBlockInfo;
@@ -44,19 +59,6 @@ import com.tencent.rss.server.ShuffleServerConf;
 import com.tencent.rss.storage.common.DiskItem;
 import com.tencent.rss.storage.util.ShuffleStorageUtils;
 import com.tencent.rss.storage.util.StorageType;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.roaringbitmap.longlong.Roaring64NavigableMap;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -92,7 +94,7 @@ public class MultiStorageTest extends ShuffleReadWriteBase {
 
   @Before
   public void createClient() {
-    shuffleServerClient = new ShuffleServerGrpcClient(LOCALHOST, SHUFFLE_SERVER_PORT);
+    shuffleServerClient = new ShuffleServerGrpcClient(LOCALHOST, SHUFFLE_SERVER_GRPC_PORT);
   }
 
   @After
@@ -203,22 +205,22 @@ public class MultiStorageTest extends ShuffleReadWriteBase {
         1, 10, 1000,  0);
     assertEquals(0, result.getData().length);
 
-    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl("LOCALFILE_AND_HDFS",
+    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl("LOCALFILE_AND_HDFS", ClientType.GRPC.name(),
         appId, 0, 0, 100, 1, 10, 1000, HDFS_URI + "rss/multi_storage",
         blockIdBitmap1, Roaring64NavigableMap.bitmapOf(1), Lists.newArrayList(), conf);
     validateResult(readClient, expectedData, blockIdBitmap1);
 
-    readClient = new ShuffleReadClientImpl("LOCALFILE_AND_HDFS",
+    readClient = new ShuffleReadClientImpl("LOCALFILE_AND_HDFS", ClientType.GRPC.name(),
         appId, 0, 1, 100, 1, 10, 1000, HDFS_URI + "rss/multi_storage",
         blockIdBitmap2, Roaring64NavigableMap.bitmapOf(1), Lists.newArrayList(), conf);
     validateResult(readClient, expectedData, blockIdBitmap2);
 
-    readClient = new ShuffleReadClientImpl("LOCALFILE_AND_HDFS",
+    readClient = new ShuffleReadClientImpl("LOCALFILE_AND_HDFS", ClientType.GRPC.name(),
         appId, 0, 2, 100, 1, 10, 1000, HDFS_URI + "rss/multi_storage",
         blockIdBitmap3, Roaring64NavigableMap.bitmapOf(2), Lists.newArrayList(), conf);
     validateResult(readClient, expectedData, blockIdBitmap3);
 
-    readClient = new ShuffleReadClientImpl("LOCALFILE_AND_HDFS",
+    readClient = new ShuffleReadClientImpl("LOCALFILE_AND_HDFS", ClientType.GRPC.name(),
         appId, 0, 4, 100, 1, 10, 1000, HDFS_URI + "rss/multi_storage",
         blockIdBitmap4, Roaring64NavigableMap.bitmapOf(3), Lists.newArrayList(), conf);
     validateResult(readClient, expectedData, blockIdBitmap4);
@@ -347,9 +349,10 @@ public class MultiStorageTest extends ShuffleReadWriteBase {
     RssGetShuffleResultRequest rg1 = new RssGetShuffleResultRequest(appId, 0, 0);
     shuffleServerClient.getShuffleResult(rg1);
 
-    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl("LOCALFILE_AND_HDFS",
+    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl("LOCALFILE_AND_HDFS", ClientType.GRPC.name(),
         appId, 0, 0, 100, 1, 10, 1000, HDFS_URI + "rss/multi_storage",
-        blockIdBitmap1, Roaring64NavigableMap.bitmapOf(1), Lists.newArrayList(new ShuffleServerInfo("test", LOCALHOST, SHUFFLE_SERVER_PORT)), conf);
+        blockIdBitmap1, Roaring64NavigableMap.bitmapOf(1), Lists.newArrayList(
+            new ShuffleServerInfo("test", LOCALHOST, SHUFFLE_SERVER_GRPC_PORT, SHUFFLE_SERVER_NETTY_PORT)), conf);
 
     CompressedShuffleBlock csb = readClient.readShuffleBlockData();
     Roaring64NavigableMap matched = Roaring64NavigableMap.bitmapOf();
@@ -453,9 +456,10 @@ public class MultiStorageTest extends ShuffleReadWriteBase {
     RssGetShuffleResultRequest rg1 = new RssGetShuffleResultRequest(appId, 2, 0);
     shuffleServerClient.getShuffleResult(rg1);
     validateResult(appId, 2, 0, expectedData, Sets.newHashSet());
-    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl("LOCALFILE_AND_HDFS",
+    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl("LOCALFILE_AND_HDFS", ClientType.GRPC.name(),
         appId, 2, 0, 100, 1, 10, 1000, HDFS_URI + "rss/multi_storage",
-        blockIdBitmap1, Roaring64NavigableMap.bitmapOf(1), Lists.newArrayList(new ShuffleServerInfo("test", LOCALHOST, SHUFFLE_SERVER_PORT)), conf);
+        blockIdBitmap1, Roaring64NavigableMap.bitmapOf(1), Lists.newArrayList(
+            new ShuffleServerInfo("test", LOCALHOST, SHUFFLE_SERVER_GRPC_PORT, SHUFFLE_SERVER_NETTY_PORT)), conf);
     validateResult(readClient, expectedData, blockIdBitmap1);
     try {
       sendSinglePartitionToShuffleServer(appId, 3, 1,2, blocks2);

@@ -18,9 +18,21 @@
 
 package com.tencent.rss.test;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.apache.hadoop.hdfs.server.common.HdfsServerConstants;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.roaringbitmap.longlong.Roaring64NavigableMap;
+
 import com.tencent.rss.client.impl.ShuffleReadClientImpl;
 import com.tencent.rss.client.impl.grpc.ShuffleServerGrpcClient;
 import com.tencent.rss.client.request.RssFinishShuffleRequest;
@@ -29,6 +41,7 @@ import com.tencent.rss.client.request.RssReportShuffleResultRequest;
 import com.tencent.rss.client.request.RssSendCommitRequest;
 import com.tencent.rss.client.request.RssSendShuffleDataRequest;
 import com.tencent.rss.client.response.CompressedShuffleBlock;
+import com.tencent.rss.client.util.ClientType;
 import com.tencent.rss.common.PartitionRange;
 import com.tencent.rss.common.ShuffleBlockInfo;
 import com.tencent.rss.common.ShuffleServerInfo;
@@ -36,17 +49,6 @@ import com.tencent.rss.coordinator.CoordinatorConf;
 import com.tencent.rss.server.ShuffleServerConf;
 import com.tencent.rss.storage.util.ShuffleStorageUtils;
 import com.tencent.rss.storage.util.StorageType;
-import org.apache.hadoop.hdfs.server.common.HdfsServerConstants;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.roaringbitmap.longlong.Roaring64NavigableMap;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -79,7 +81,7 @@ public class MultiStorageFaultToleranceTest extends ShuffleReadWriteBase {
 
   @Before
   public void createClient() {
-    shuffleServerClient = new ShuffleServerGrpcClient(LOCALHOST, SHUFFLE_SERVER_PORT);
+    shuffleServerClient = new ShuffleServerGrpcClient(LOCALHOST, SHUFFLE_SERVER_GRPC_PORT);
   }
 
   @After
@@ -218,9 +220,10 @@ public class MultiStorageFaultToleranceTest extends ShuffleReadWriteBase {
 
   protected void validateResult(String appId, int shuffleId, int partitionId, Roaring64NavigableMap blockBitmap,
                                 Roaring64NavigableMap taskBitmap, Map<Long, byte[]> expectedData) {
-    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl("LOCALFILE_AND_HDFS",
+    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl("LOCALFILE_AND_HDFS", ClientType.GRPC.name(),
         appId, shuffleId, partitionId, 100, 1, 10, 1000, HDFS_URI + "rss/multi_storage_fault",
-        blockBitmap, taskBitmap, Lists.newArrayList(new ShuffleServerInfo("test", LOCALHOST, SHUFFLE_SERVER_PORT)), conf);
+        blockBitmap, taskBitmap, Lists.newArrayList(
+            new ShuffleServerInfo("test", LOCALHOST, SHUFFLE_SERVER_GRPC_PORT, SHUFFLE_SERVER_NETTY_PORT)), conf);
     CompressedShuffleBlock csb = readClient.readShuffleBlockData();
     Roaring64NavigableMap matched = Roaring64NavigableMap.bitmapOf();
     while (csb != null && csb.getByteBuffer() != null) {

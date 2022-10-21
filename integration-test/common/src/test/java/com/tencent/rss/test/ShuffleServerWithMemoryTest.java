@@ -18,10 +18,21 @@
 
 package com.tencent.rss.test;
 
+import java.io.File;
+import java.util.List;
+import java.util.Map;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.Files;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.roaringbitmap.longlong.Roaring64NavigableMap;
+
 import com.tencent.rss.client.impl.grpc.ShuffleServerGrpcClient;
+import com.tencent.rss.client.impl.grpc.ShuffleServerGrpcNettyClient;
 import com.tencent.rss.client.request.RssRegisterShuffleRequest;
 import com.tencent.rss.client.request.RssSendShuffleDataRequest;
 import com.tencent.rss.common.BufferSegment;
@@ -36,15 +47,6 @@ import com.tencent.rss.storage.handler.impl.ComposedClientReadHandler;
 import com.tencent.rss.storage.handler.impl.LocalFileClientReadHandler;
 import com.tencent.rss.storage.handler.impl.MemoryClientReadHandler;
 import com.tencent.rss.storage.util.StorageType;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.roaringbitmap.longlong.Roaring64NavigableMap;
-
-import java.io.File;
-import java.util.List;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -75,7 +77,9 @@ public class ShuffleServerWithMemoryTest extends ShuffleReadWriteBase {
 
   @Before
   public void createClient() {
-    shuffleServerClient = new ShuffleServerGrpcClient(LOCALHOST, SHUFFLE_SERVER_PORT);
+    //shuffleServerClient = new ShuffleServerGrpcClient(LOCALHOST, SHUFFLE_SERVER_GRPC_PORT);
+    shuffleServerClient = new ShuffleServerGrpcNettyClient(
+        LOCALHOST, SHUFFLE_SERVER_GRPC_PORT, SHUFFLE_SERVER_NETTY_PORT);
   }
 
   @After

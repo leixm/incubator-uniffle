@@ -39,6 +39,7 @@ public class LocalFileClientReadHandler extends AbstractClientReadHandler {
   private static final Logger LOG = LoggerFactory.getLogger(LocalFileClientReadHandler.class);
   private int partitionNumPerRange;
   private int partitionNum;
+  private int readBufferSize;
   private List<ShuffleServerClient> shuffleServerClients;
   private List<ShuffleDataSegment> shuffleDataSegments = Lists.newLinkedList();
   private int segmentIndex = 0;

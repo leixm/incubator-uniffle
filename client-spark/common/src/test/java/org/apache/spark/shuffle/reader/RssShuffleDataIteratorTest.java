@@ -18,22 +18,11 @@
 
 package org.apache.spark.shuffle.reader;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.any;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.tencent.rss.client.impl.ShuffleReadClientImpl;
-import com.tencent.rss.client.util.ClientUtils;
-import com.tencent.rss.common.util.ChecksumUtils;
-import com.tencent.rss.common.util.Constants;
-import com.tencent.rss.storage.handler.impl.HdfsShuffleWriteHandler;
-import com.tencent.rss.storage.util.StorageType;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
@@ -45,6 +34,19 @@ import org.junit.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.roaringbitmap.longlong.Roaring64NavigableMap;
+
+import com.tencent.rss.client.impl.ShuffleReadClientImpl;
+import com.tencent.rss.client.util.ClientType;
+import com.tencent.rss.client.util.ClientUtils;
+import com.tencent.rss.common.util.ChecksumUtils;
+import com.tencent.rss.common.util.Constants;
+import com.tencent.rss.storage.handler.impl.HdfsShuffleWriteHandler;
+import com.tencent.rss.storage.util.StorageType;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 
 public class RssShuffleDataIteratorTest extends AbstractRssReaderTest {
 
@@ -85,7 +87,7 @@ public class RssShuffleDataIteratorTest extends AbstractRssReaderTest {
 
   private RssShuffleDataIterator getDataIterator(String basePath, Roaring64NavigableMap blockIdBitmap, Roaring64NavigableMap taskIdBitmap) {
     ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(
-        StorageType.HDFS.name(), "appId", 0, 1, 100, 2,
+        StorageType.HDFS.name(), ClientType.GRPC.name(), "appId", 0, 1, 100, 2,
         10, 10000, basePath, blockIdBitmap, taskIdBitmap, Lists.newArrayList(), new Configuration());
     return new RssShuffleDataIterator(KRYO_SERIALIZER, readClient,
         new ShuffleReadMetrics());

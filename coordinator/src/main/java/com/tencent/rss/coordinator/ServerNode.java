@@ -26,7 +26,8 @@ public class ServerNode implements Comparable<ServerNode> {
 
   private String id;
   private String ip;
-  private int port;
+  private int grpcPort;
+  private int nettyPort;
   private long usedMemory;
   private long preAllocatedMemory;
   private long availableMemory;
@@ -38,7 +39,8 @@ public class ServerNode implements Comparable<ServerNode> {
   public ServerNode(
       String id,
       String ip,
-      int port,
+      int grpcPort,
+      int nettyPort,
       long usedMemory,
       long preAllocatedMemory,
       long availableMemory,
@@ -47,7 +49,8 @@ public class ServerNode implements Comparable<ServerNode> {
       boolean isHealthy) {
     this.id = id;
     this.ip = ip;
-    this.port = port;
+    this.grpcPort = grpcPort;
+    this.nettyPort = nettyPort;
     this.usedMemory = usedMemory;
     this.preAllocatedMemory = preAllocatedMemory;
     this.availableMemory = availableMemory;
@@ -58,7 +61,7 @@ public class ServerNode implements Comparable<ServerNode> {
   }
 
   public ShuffleServerId convertToGrpcProto() {
-    return ShuffleServerId.newBuilder().setId(id).setIp(ip).setPort(port).build();
+    return ShuffleServerId.newBuilder().setId(id).setIp(ip).setGrpcPort(grpcPort).setNettyPort(nettyPort).build();
   }
 
   public String getId() {
@@ -67,10 +70,6 @@ public class ServerNode implements Comparable<ServerNode> {
 
   public String getIp() {
     return ip;
-  }
-
-  public int getPort() {
-    return port;
   }
 
   public long getTimestamp() {
@@ -101,11 +100,20 @@ public class ServerNode implements Comparable<ServerNode> {
     return isHealthy;
   }
 
+  public int getGrpcPort() {
+    return grpcPort;
+  }
+
+  public int getNettyPort() {
+    return nettyPort;
+  }
+
   @Override
   public String toString() {
     return "ServerNode with id[" + id
         + "], ip[" + ip
-        + "], port[" + port
+        + "], grpcPort[" + grpcPort
+        + "], nettyPort[" + nettyPort
         + "], usedMemory[" + usedMemory
         + "], preAllocatedMemory[" + preAllocatedMemory
         + "], availableMemory[" + availableMemory

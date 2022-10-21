@@ -513,7 +513,7 @@ public class ShuffleServerGrpcService extends ShuffleServerImplBase {
           ShuffleServerMetrics.counterTotalReadDataSize.inc(data.length);
           ShuffleServerMetrics.counterTotalReadMemoryDataSize.inc(data.length);
         }
-        LOG.info("Successfully getInMemoryShuffleData cost {} ms with {} bytes shuffle"
+        LOG.info("Successfully getInMemoryShuffleData with grpc cost {} ms with {} bytes shuffle"
             + " data for {}", (System.currentTimeMillis() - start), data.length, requestInfo);
 
         reply = GetMemoryShuffleDataResponse.newBuilder()

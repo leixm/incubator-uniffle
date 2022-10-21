@@ -24,6 +24,7 @@ import com.google.common.collect.Maps;
 
 import com.tencent.rss.client.api.ShuffleServerClient;
 import com.tencent.rss.client.impl.grpc.ShuffleServerGrpcClient;
+import com.tencent.rss.client.impl.grpc.ShuffleServerGrpcNettyClient;
 import com.tencent.rss.client.util.ClientType;
 import com.tencent.rss.common.ShuffleServerInfo;
 
@@ -45,7 +46,11 @@ public class ShuffleServerClientFactory {
 
   private ShuffleServerClient createShuffleServerClient(String clientType, ShuffleServerInfo shuffleServerInfo) {
     if (clientType.equalsIgnoreCase(ClientType.GRPC.name())) {
-      return new ShuffleServerGrpcClient(shuffleServerInfo.getHost(), shuffleServerInfo.getPort());
+      return new ShuffleServerGrpcClient(shuffleServerInfo.getHost(), shuffleServerInfo.getGrpcPort());
+    }
+    if (clientType.equalsIgnoreCase(ClientType.GRPC_NETTY.name())) {
+      return new ShuffleServerGrpcNettyClient(shuffleServerInfo.getHost(),
+          shuffleServerInfo.getGrpcPort(), shuffleServerInfo.getNettyPort());
     } else {
       throw new UnsupportedOperationException("Unsupported client type " + clientType);
     }

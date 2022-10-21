@@ -31,6 +31,7 @@ public class CreateShuffleReadClientRequest {
   private int shuffleId;
   private int partitionId;
   private String storageType;
+  private String clientType;
   private String basePath;
   private int indexReadLimit;
   private int readBufferSize;
@@ -42,13 +43,14 @@ public class CreateShuffleReadClientRequest {
   private Configuration hadoopConf;
 
   public CreateShuffleReadClientRequest(String appId, int shuffleId, int partitionId, String storageType,
-      String basePath, int indexReadLimit, int readBufferSize, int partitionNumPerRange,
+      String clientType, String basePath, int indexReadLimit, int readBufferSize, int partitionNumPerRange,
       int partitionNum, Roaring64NavigableMap blockIdBitmap, Roaring64NavigableMap taskIdBitmap,
       List<ShuffleServerInfo> shuffleServerInfoList, Configuration hadoopConf) {
     this.appId = appId;
     this.shuffleId = shuffleId;
     this.partitionId = partitionId;
     this.storageType = storageType;
+    this.clientType = clientType;
     this.basePath = basePath;
     this.indexReadLimit = indexReadLimit;
     this.readBufferSize = readBufferSize;
@@ -110,5 +112,9 @@ public class CreateShuffleReadClientRequest {
 
   public Configuration getHadoopConf() {
     return hadoopConf;
+  }
+
+  public String getClientType() {
+    return clientType;
   }
 }

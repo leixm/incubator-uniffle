@@ -18,6 +18,8 @@
 
 package org.apache.spark.shuffle;
 
+import com.tencent.rss.client.util.ClientType;
+
 public class RssClientConfig {
 
   public static String RSS_PARTITION_NUM_PER_RANGE = "spark.rss.partitionNum.per.range";
@@ -46,7 +48,7 @@ public class RssClientConfig {
   public static String RSS_INDEX_READ_LIMIT = "spark.rss.index.read.limit";
   public static int RSS_INDEX_READ_LIMIT_DEFAULT_VALUE = 500;
   public static String RSS_CLIENT_TYPE = "spark.rss.client.type";
-  public static String RSS_CLIENT_TYPE_DEFAULT_VALUE = "GRPC";
+  public static String RSS_CLIENT_TYPE_DEFAULT_VALUE = ClientType.GRPC.name();
   public static String RSS_STORAGE_TYPE = "spark.rss.storage.type";
   public static String RSS_CLIENT_RETRY_MAX = "spark.rss.client.retry.max";
   public static int RSS_CLIENT_RETRY_MAX_DEFAULT_VALUE = 50;
@@ -77,4 +79,8 @@ public class RssClientConfig {
   public static int RSS_CLIENT_BLOCK_NUM_PER_TASK_PARTITION_DEFAULT_VALUE = 20;
   public static String RSS_CLIENT_BLOCK_NUM_PER_BITMAP = "spark.rss.block.per.bitmap";
   public static long RSS_CLIENT_BLOCK_NUM_PER_BITMAP_DEFAULT_VALUE = 100000000;
+  public static String RSS_CLIENT_SEND_DATA_TIMEOUT = "spark.rss.client.sendData.timeout";
+  public static int RSS_CLIENT_SEND_DATA_TIMEOUT_DEFAULT_VALUE = 10000; // 10s
+  public static String RSS_CLIENT_FETCH_DATA_TIMEOUT = "spark.rss.client.fetchData.timeout";
+  public static int RSS_CLIENT_FETCH_DATA_TIMEOUT_DEFAULT_VALUE = 10000; // 10s
 }

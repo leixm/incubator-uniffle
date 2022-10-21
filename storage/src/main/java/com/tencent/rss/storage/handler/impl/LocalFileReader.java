@@ -40,6 +40,7 @@ public class LocalFileReader implements FileReader, Closeable {
     dataInputStream = new DataInputStream(new FileInputStream(path));
   }
 
+
   public byte[] read(long offset, int length) {
     try {
       dataInputStream.skip(offset);

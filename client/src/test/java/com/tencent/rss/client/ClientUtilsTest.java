@@ -18,12 +18,13 @@
 
 package com.tencent.rss.client;
 
+import org.junit.Test;
+
+import com.tencent.rss.client.util.ClientUtils;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
-import com.tencent.rss.client.util.ClientUtils;
-import org.junit.Test;
 
 public class ClientUtilsTest {
 

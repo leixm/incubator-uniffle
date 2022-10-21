@@ -63,6 +63,7 @@ public class RssShuffleReader<K, C> implements ShuffleReader<K, C> {
   private int partitionNumPerRange;
   private int partitionNum;
   private String storageType;
+  private String clientType;
   private Roaring64NavigableMap blockIdBitmap;
   private Roaring64NavigableMap taskIdBitmap;
   private List<ShuffleServerInfo> shuffleServerInfoList;
@@ -77,6 +78,7 @@ public class RssShuffleReader<K, C> implements ShuffleReader<K, C> {
       int indexReadLimit,
       Configuration hadoopConf,
       String storageType,
+      String clientType,
       int readBufferSize,
       int partitionNumPerRange,
       int partitionNum,
@@ -93,6 +95,7 @@ public class RssShuffleReader<K, C> implements ShuffleReader<K, C> {
     this.basePath = basePath;
     this.indexReadLimit = indexReadLimit;
     this.storageType = storageType;
+    this.clientType = clientType;
     this.readBufferSize = readBufferSize;
     this.partitionNumPerRange = partitionNumPerRange;
     this.partitionNum = partitionNum;
@@ -108,9 +111,11 @@ public class RssShuffleReader<K, C> implements ShuffleReader<K, C> {
     LOG.info("Shuffle read started:" + getReadInfo());
 
     CreateShuffleReadClientRequest request = new CreateShuffleReadClientRequest(
-        appId, shuffleId, startPartition, storageType, basePath, indexReadLimit, readBufferSize,
-        partitionNumPerRange, partitionNum, blockIdBitmap, taskIdBitmap, shuffleServerInfoList, hadoopConf);
-    ShuffleReadClient shuffleReadClient = ShuffleClientFactory.getInstance().createShuffleReadClient(request);
+        appId, shuffleId, startPartition, storageType, clientType, basePath, indexReadLimit,
+        readBufferSize, partitionNumPerRange, partitionNum, blockIdBitmap, taskIdBitmap,
+        shuffleServerInfoList, hadoopConf);
+    ShuffleReadClient shuffleReadClient =
+        ShuffleClientFactory.getInstance().createShuffleReadClient(request);
     RssShuffleDataIterator rssShuffleDataIterator = new RssShuffleDataIterator<K, C>(
         shuffleDependency.serializer(), shuffleReadClient,
         context.taskMetrics().shuffleReadMetrics());

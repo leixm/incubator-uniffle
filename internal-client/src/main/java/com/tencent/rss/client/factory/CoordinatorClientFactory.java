@@ -39,7 +39,8 @@ public class CoordinatorClientFactory {
   }
 
   public CoordinatorClient createCoordinatorClient(String host, int port) {
-    if (clientType.equalsIgnoreCase(ClientType.GRPC.name())) {
+    if (clientType.equalsIgnoreCase(ClientType.GRPC.name())
+        || clientType.equalsIgnoreCase(ClientType.GRPC_NETTY.name())) {
       return new CoordinatorGrpcClient(host, port);
     } else {
       throw new UnsupportedOperationException("Unsupported client type " + clientType);

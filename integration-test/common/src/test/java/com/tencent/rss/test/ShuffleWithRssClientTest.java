@@ -18,10 +18,20 @@
 
 package com.tencent.rss.test;
 
+import java.io.File;
+import java.util.List;
+import java.util.Map;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.roaringbitmap.longlong.Roaring64NavigableMap;
+
 import com.tencent.rss.client.impl.ShuffleReadClientImpl;
 import com.tencent.rss.client.impl.ShuffleWriteClientImpl;
 import com.tencent.rss.client.response.SendShuffleDataResult;
@@ -33,15 +43,6 @@ import com.tencent.rss.common.ShuffleServerInfo;
 import com.tencent.rss.coordinator.CoordinatorConf;
 import com.tencent.rss.server.ShuffleServerConf;
 import com.tencent.rss.storage.util.StorageType;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.roaringbitmap.longlong.Roaring64NavigableMap;
-
-import java.io.File;
-import java.util.List;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -73,14 +74,16 @@ public class ShuffleWithRssClientTest extends ShuffleReadWriteBase {
     File dataDir4 = new File(tmpDir, "data4");
     basePath = dataDir3.getAbsolutePath() + "," + dataDir4.getAbsolutePath();
     shuffleServerConf.setString("rss.storage.basePath", basePath);
-    shuffleServerConf.setInteger("rss.rpc.server.port", SHUFFLE_SERVER_PORT + 1);
+    shuffleServerConf.setInteger("rss.rpc.server.port", SHUFFLE_SERVER_GRPC_PORT + 1);
     shuffleServerConf.setInteger("rss.jetty.http.port", 18081);
     createShuffleServer(shuffleServerConf);
     startServers();
     shuffleServerInfo1 =
-        new ShuffleServerInfo("127.0.0.1-20001", shuffleServers.get(0).getIp(), SHUFFLE_SERVER_PORT);
+        new ShuffleServerInfo("127.0.0.1-20001", shuffleServers.get(0).getIp(),
+            SHUFFLE_SERVER_GRPC_PORT, SHUFFLE_SERVER_NETTY_PORT);
     shuffleServerInfo2 =
-        new ShuffleServerInfo("127.0.0.1-20001", shuffleServers.get(1).getIp(), SHUFFLE_SERVER_PORT + 1);
+        new ShuffleServerInfo("127.0.0.1-20001", shuffleServers.get(1).getIp(),
+            SHUFFLE_SERVER_GRPC_PORT + 1, SHUFFLE_SERVER_NETTY_PORT + 1);
   }
 
   @Before
@@ -103,7 +106,8 @@ public class ShuffleWithRssClientTest extends ShuffleReadWriteBase {
 
     // simulator a failed server
     ShuffleServerInfo fakeShuffleServerInfo =
-        new ShuffleServerInfo("127.0.0.1-20001", shuffleServers.get(0).getIp(), SHUFFLE_SERVER_PORT + 100);
+        new ShuffleServerInfo("127.0.0.1-20001", shuffleServers.get(0).getIp(),
+            SHUFFLE_SERVER_GRPC_PORT + 100, SHUFFLE_SERVER_NETTY_PORT + 100);
     List<ShuffleBlockInfo> blocks = createShuffleBlockList(
         0, 0, 0, 3, 25, blockIdBitmap,
         expectedData, Lists.newArrayList(shuffleServerInfo1, fakeShuffleServerInfo));
@@ -220,7 +224,8 @@ public class ShuffleWithRssClientTest extends ShuffleReadWriteBase {
         .sendCommit(Sets.newHashSet(shuffleServerInfo1, shuffleServerInfo2), testAppId, 0, 2);
     assertTrue(commitResult);
 
-    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.LOCALFILE.name(), testAppId, 0, 0, 100, 1,
+    ShuffleReadClientImpl readClient = new ShuffleReadClientImpl(StorageType.LOCALFILE.name(),
+        ClientType.GRPC.name(),testAppId, 0, 0, 100, 1,
         10, 1000, "", blockIdBitmap, taskIdBitmap,
         Lists.newArrayList(shuffleServerInfo1, shuffleServerInfo2), null);
 
@@ -236,7 +241,8 @@ public class ShuffleWithRssClientTest extends ShuffleReadWriteBase {
     commitResult = shuffleWriteClientImpl
         .sendCommit(Sets.newHashSet(shuffleServerInfo1, shuffleServerInfo2), testAppId, 0, 2);
     assertTrue(commitResult);
-    readClient = new ShuffleReadClientImpl(StorageType.LOCALFILE.name(), testAppId, 0, 0, 100, 1,
+    readClient = new ShuffleReadClientImpl(StorageType.LOCALFILE.name(), ClientType.GRPC.name(),
+        testAppId, 0, 0, 100, 1,
         10, 1000, "", blockIdBitmap, taskIdBitmap,
         Lists.newArrayList(shuffleServerInfo1, shuffleServerInfo2), null);
     validateResult(readClient, expectedData);
@@ -245,7 +251,8 @@ public class ShuffleWithRssClientTest extends ShuffleReadWriteBase {
 
     // commit will be failed because of fakeIp
     commitResult = shuffleWriteClientImpl.sendCommit(Sets.newHashSet(new ShuffleServerInfo(
-        "127.0.0.1-20001", "fakeIp", SHUFFLE_SERVER_PORT)), testAppId, 0, 2);
+        "127.0.0.1-20001", "fakeIp", SHUFFLE_SERVER_GRPC_PORT, SHUFFLE_SERVER_NETTY_PORT))
+        , testAppId, 0, 2);
     assertFalse(commitResult);
 
     // wait resource to be deleted
