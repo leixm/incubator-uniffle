@@ -183,6 +183,7 @@ public class PartitionBalanceAssignmentStrategyTest {
           String.valueOf((char)('a' + i)),
           "",
           0,
+          0,
           10L,
           5L,
           resources.get(i),
@@ -198,7 +199,7 @@ public class PartitionBalanceAssignmentStrategyTest {
     Set<String> serverTags = Sets.newHashSet("tag-1");
 
     for (int i = 0; i < 20; ++i) {
-      clusterManager.add(new ServerNode("t1-" + i, "", 0, 0, 0,
+      clusterManager.add(new ServerNode("t1-" + i, "", 0, 0, 0, 0,
           20 - i, 0, serverTags, true));
     }
 
@@ -268,7 +269,7 @@ public class PartitionBalanceAssignmentStrategyTest {
      */
     serverTags = Sets.newHashSet("tag-2");
     for (int i = 0; i < shuffleNodesMax - 1; ++i) {
-      clusterManager.add(new ServerNode("t2-" + i, "", 0, 0, 0,
+      clusterManager.add(new ServerNode("t2-" + i, "", 0, 0, 0, 0,
           20 - i, 0, serverTags, true));
     }
     pra = strategy.assign(100, 1, 1, serverTags, shuffleNodesMax);

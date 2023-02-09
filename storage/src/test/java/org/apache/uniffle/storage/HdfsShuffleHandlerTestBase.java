@@ -24,6 +24,7 @@ import com.google.common.collect.Lists;
 import org.apache.uniffle.common.BufferSegment;
 import org.apache.uniffle.common.ShuffleDataResult;
 import org.apache.uniffle.common.ShufflePartitionedBlock;
+import org.apache.uniffle.common.util.ByteBufUtils;
 import org.apache.uniffle.common.util.ChecksumUtils;
 import org.apache.uniffle.common.util.Constants;
 import org.apache.uniffle.storage.common.FileBasedShuffleSegment;
@@ -53,7 +54,7 @@ public class HdfsShuffleHandlerTestBase extends HdfsTestBase {
       long blockId = (ATOMIC_LONG.getAndIncrement()
           << (Constants.PARTITION_ID_MAX_LENGTH + Constants.TASK_ATTEMPT_ID_MAX_LENGTH)) + taskAttemptId;
       blocks.add(new ShufflePartitionedBlock(
-          length, length, ChecksumUtils.getCrc32(buf), blockId, taskAttemptId, buf));
+          length, length, ChecksumUtils.getCrc32(buf), blockId, taskAttemptId, ByteBufUtils.wrappedBuffer(buf)));
       expectedData.put(blockId, buf);
     }
     writeHandler.write(blocks);
@@ -75,7 +76,7 @@ public class HdfsShuffleHandlerTestBase extends HdfsTestBase {
       long blockId = (ATOMIC_LONG.getAndIncrement()
           << (Constants.PARTITION_ID_MAX_LENGTH + Constants.TASK_ATTEMPT_ID_MAX_LENGTH)) + taskAttemptId;
       blocks.add(new ShufflePartitionedBlock(
-          length, length, ChecksumUtils.getCrc32(buf), blockId, taskAttemptId, buf));
+          length, length, ChecksumUtils.getCrc32(buf), blockId, taskAttemptId, ByteBufUtils.wrappedBuffer(buf)));
       expectedData.put(blockId, buf);
     }
     expectedBlocks.put(partitionId, blocks);
@@ -86,7 +87,7 @@ public class HdfsShuffleHandlerTestBase extends HdfsTestBase {
       offset += spb.getLength();
       segments.add(segment);
       if (doWrite) {
-        writer.writeData(spb.getData());
+        writer.writeData(ByteBufUtils.readBytes(spb.getData()));
       }
     }
     expectedIndexSegments.put(partitionId, segments);

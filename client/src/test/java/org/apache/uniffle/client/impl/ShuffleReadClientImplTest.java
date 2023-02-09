@@ -28,6 +28,7 @@ import com.google.common.collect.Maps;
 import org.apache.uniffle.client.TestUtils;
 import org.apache.uniffle.client.util.DefaultIdHelper;
 import org.apache.uniffle.common.ShufflePartitionedBlock;
+import org.apache.uniffle.common.util.ByteBufUtils;
 import org.apache.uniffle.common.util.ChecksumUtils;
 import org.apache.uniffle.common.util.Constants;
 import org.apache.uniffle.storage.HdfsTestBase;
@@ -460,7 +461,7 @@ public class ShuffleReadClientImplTest extends HdfsTestBase {
       long blockId = (ATOMIC_LONG.getAndIncrement()
           << (Constants.PARTITION_ID_MAX_LENGTH + Constants.TASK_ATTEMPT_ID_MAX_LENGTH)) + taskAttemptId;
       blocks.add(new ShufflePartitionedBlock(
-          length, length, ChecksumUtils.getCrc32(buf), blockId, taskAttemptId, buf));
+          length, length, ChecksumUtils.getCrc32(buf), blockId, taskAttemptId, ByteBufUtils.wrappedBuffer(buf)));
       expectedData.put(blockId, buf);
       blockIdBitmap.addLong(blockId);
     }
@@ -479,7 +480,7 @@ public class ShuffleReadClientImplTest extends HdfsTestBase {
       long blockId = (ATOMIC_LONG.incrementAndGet()
           << (Constants.PARTITION_ID_MAX_LENGTH + Constants.TASK_ATTEMPT_ID_MAX_LENGTH)) + taskAttemptId;
       ShufflePartitionedBlock spb = new ShufflePartitionedBlock(
-          length, length, ChecksumUtils.getCrc32(buf), blockId, taskAttemptId, buf);
+          length, length, ChecksumUtils.getCrc32(buf), blockId, taskAttemptId, ByteBufUtils.wrappedBuffer(buf));
       blocks.add(spb);
       blocks.add(spb);
       expectedData.put(blockId, buf);

@@ -55,11 +55,11 @@ public class SimpleClusterManagerTest {
     CoordinatorConf ssc = new CoordinatorConf();
     ssc.setLong(CoordinatorConf.COORDINATOR_HEARTBEAT_TIMEOUT, 30 * 1000L);
     SimpleClusterManager clusterManager = new SimpleClusterManager(ssc, new Configuration());
-    ServerNode sn1 = new ServerNode("sn1", "ip", 0, 100L, 50L, 20,
+    ServerNode sn1 = new ServerNode("sn1", "ip", 0, 0, 100L, 50L, 20,
         10, testTags, true);
-    ServerNode sn2 = new ServerNode("sn2", "ip", 0, 100L, 50L, 21,
+    ServerNode sn2 = new ServerNode("sn2", "ip", 0,0, 100L, 50L, 21,
         10, testTags, true);
-    ServerNode sn3 = new ServerNode("sn3", "ip", 0, 100L, 50L, 20,
+    ServerNode sn3 = new ServerNode("sn3", "ip", 0, 0, 100L, 50L, 20,
         11, testTags, true);
     clusterManager.add(sn1);
     clusterManager.add(sn2);
@@ -73,11 +73,11 @@ public class SimpleClusterManagerTest {
     assertEquals(0, expectedIds.size());
 
     // tag changes
-    sn1 = new ServerNode("sn1", "ip", 0, 100L, 50L, 20,
+    sn1 = new ServerNode("sn1", "ip", 0, 0, 100L, 50L, 20,
         10, Sets.newHashSet("new_tag"), true);
-    sn2 = new ServerNode("sn2", "ip", 0, 100L, 50L, 21,
+    sn2 = new ServerNode("sn2", "ip", 0, 0, 100L, 50L, 21,
         10, Sets.newHashSet("test", "new_tag"), true);
-    ServerNode sn4 = new ServerNode("sn4", "ip", 0, 100L, 51L, 20,
+    ServerNode sn4 = new ServerNode("sn4", "ip", 0, 0, 100L, 51L, 20,
         10, testTags, true);
     clusterManager.add(sn1);
     clusterManager.add(sn2);
@@ -122,7 +122,7 @@ public class SimpleClusterManagerTest {
 
         String sn = "sn" + i;
         long availableMemory = 30 - i;
-        ServerNode node = new ServerNode(sn, "ip", 0, 100L, 50L, availableMemory,
+        ServerNode node = new ServerNode(sn, "ip", 0, 0, 100L, 50L, availableMemory,
             10, testTags, true);
         System.out.println("Add node " + node.getId() + " " + node.getTimestamp());
         clusterManager.add(node);
@@ -154,11 +154,11 @@ public class SimpleClusterManagerTest {
     CoordinatorConf ssc = new CoordinatorConf();
     ssc.setLong(CoordinatorConf.COORDINATOR_HEARTBEAT_TIMEOUT, 30 * 1000L);
     SimpleClusterManager clusterManager = new SimpleClusterManager(ssc, new Configuration());
-    ServerNode sn1 = new ServerNode("sn1", "ip", 0, 100L, 50L, 20,
+    ServerNode sn1 = new ServerNode("sn1", "ip", 0, 0, 100L, 50L, 20,
             10, testTags, true);
-    ServerNode sn2 = new ServerNode("sn2", "ip", 0, 100L, 50L, 21,
+    ServerNode sn2 = new ServerNode("sn2", "ip", 0, 0, 100L, 50L, 21,
             10, testTags, true);
-    ServerNode sn3 = new ServerNode("sn3", "ip", 0, 100L, 50L, 20,
+    ServerNode sn3 = new ServerNode("sn3", "ip", 0, 0, 100L, 50L, 20,
             11, testTags, true);
     clusterManager.add(sn1);
     clusterManager.add(sn2);
@@ -189,13 +189,13 @@ public class SimpleClusterManagerTest {
     writeExcludeHosts(excludeNodesPath, nodes);
 
     SimpleClusterManager scm = new SimpleClusterManager(ssc, new Configuration());
-    scm.add(new ServerNode("node1-1999", "ip", 0, 100L, 50L, 20,
+    scm.add(new ServerNode("node1-1999", "ip", 0, 0, 100L, 50L, 20,
         10, testTags, true));
-    scm.add(new ServerNode("node2-1999", "ip", 0, 100L, 50L, 20,
+    scm.add(new ServerNode("node2-1999", "ip", 0, 0, 100L, 50L, 20,
         10, testTags, true));
-    scm.add(new ServerNode("node3-1999", "ip", 0, 100L, 50L, 20,
+    scm.add(new ServerNode("node3-1999", "ip", 0, 0, 100L, 50L, 20,
         10, testTags, true));
-    scm.add(new ServerNode("node4-1999", "ip", 0, 100L, 50L, 20,
+    scm.add(new ServerNode("node4-1999", "ip", 0, 0, 100L, 50L, 20,
         10, testTags, true));
     assertEquals(0, scm.getExcludeNodes().size());
     Thread.sleep(3000);

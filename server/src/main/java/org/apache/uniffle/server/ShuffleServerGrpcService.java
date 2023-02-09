@@ -28,6 +28,7 @@ import com.google.protobuf.UnsafeByteOperations;
 import io.grpc.Context;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
+import org.apache.uniffle.common.util.ByteBufUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -590,7 +591,7 @@ public class ShuffleServerGrpcService extends ShuffleServerImplBase {
           block.getCrc(),
           block.getBlockId(),
           block.getTaskAttemptId(),
-          block.getData().toByteArray());
+          ByteBufUtils.wrappedBuffer(block.getData().toByteArray()));
       i++;
     }
     return ret;

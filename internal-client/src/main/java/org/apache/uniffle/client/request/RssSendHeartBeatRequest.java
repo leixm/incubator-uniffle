@@ -23,7 +23,8 @@ public class RssSendHeartBeatRequest {
 
   private final String shuffleServerId;
   private final String shuffleServerIp;
-  private final int shuffleServerPort;
+  private final int shuffleServerGrpcPort;
+  private final int shuffleServerNettyPort;
   private final long usedMemory;
   private final long preAllocatedMemory;
   private final long availableMemory;
@@ -35,7 +36,8 @@ public class RssSendHeartBeatRequest {
   public RssSendHeartBeatRequest(
       String shuffleServerId,
       String shuffleServerIp,
-      int shuffleServerPort,
+      int shuffleServerGrpcPort,
+      int shuffleServerNettyPort,
       long usedMemory,
       long preAllocatedMemory,
       long availableMemory,
@@ -45,7 +47,8 @@ public class RssSendHeartBeatRequest {
       boolean isHealthy) {
     this.shuffleServerId = shuffleServerId;
     this.shuffleServerIp = shuffleServerIp;
-    this.shuffleServerPort = shuffleServerPort;
+    this.shuffleServerGrpcPort = shuffleServerGrpcPort;
+    this.shuffleServerNettyPort = shuffleServerNettyPort;
     this.usedMemory = usedMemory;
     this.preAllocatedMemory = preAllocatedMemory;
     this.availableMemory = availableMemory;
@@ -61,10 +64,6 @@ public class RssSendHeartBeatRequest {
 
   public String getShuffleServerIp() {
     return shuffleServerIp;
-  }
-
-  public int getShuffleServerPort() {
-    return shuffleServerPort;
   }
 
   public long getTimeout() {
@@ -93,5 +92,13 @@ public class RssSendHeartBeatRequest {
 
   public boolean isHealthy() {
     return isHealthy;
+  }
+
+  public int getShuffleServerGrpcPort() {
+    return shuffleServerGrpcPort;
+  }
+
+  public int getShuffleServerNettyPort() {
+    return shuffleServerNettyPort;
   }
 }

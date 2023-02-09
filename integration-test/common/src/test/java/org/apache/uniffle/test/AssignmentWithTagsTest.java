@@ -160,7 +160,7 @@ public class AssignmentWithTagsTest extends CoordinatorTestBase {
                 .values()
                 .stream()
                 .flatMap(x -> x.stream())
-                .map(x -> x.getPort())
+                .map(x -> x.getGrpcPort())
                 .collect(Collectors.toList());
         assertEquals(1, assignedServerPorts.size());
         assertTrue(tagOfShufflePorts.get(Constants.SHUFFLE_SERVER_VERSION).contains(assignedServerPorts.get(0)));
@@ -182,7 +182,7 @@ public class AssignmentWithTagsTest extends CoordinatorTestBase {
                 .values()
                 .stream()
                 .flatMap(x -> x.stream())
-                .map(x -> x.getPort())
+                .map(x -> x.getGrpcPort())
                 .collect(Collectors.toList());
         assertEquals(1, assignedServerPorts.size());
         assertTrue(tagOfShufflePorts.get("fixed").contains(assignedServerPorts.get(0)));
@@ -195,7 +195,7 @@ public class AssignmentWithTagsTest extends CoordinatorTestBase {
                 .values()
                 .stream()
                 .flatMap(x -> x.stream())
-                .map(x -> x.getPort())
+                .map(x -> x.getGrpcPort())
                 .collect(Collectors.toList());
         assertEquals(1, assignedServerPorts.size());
         assertTrue(tagOfShufflePorts.get("fixed").contains(assignedServerPorts.get(0)));

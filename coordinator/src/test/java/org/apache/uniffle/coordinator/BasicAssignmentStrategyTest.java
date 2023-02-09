@@ -63,7 +63,7 @@ public class BasicAssignmentStrategyTest {
   @Test
   public void testAssign() {
     for (int i = 0; i < 20; ++i) {
-      clusterManager.add(new ServerNode(String.valueOf(i), "", 0, 0, 0,
+      clusterManager.add(new ServerNode(String.valueOf(i), "", 0, 0, 0, 0,
           20 - i, 0, tags, true));
     }
 
@@ -90,7 +90,7 @@ public class BasicAssignmentStrategyTest {
   @Test
   public void testRandomAssign() {
     for (int i = 0; i < 20; ++i) {
-      clusterManager.add(new ServerNode(String.valueOf(i), "", 0, 0, 0,
+      clusterManager.add(new ServerNode(String.valueOf(i), "", 0, 0, 0, 0,
           0, 0, tags, true));
     }
     PartitionRangeAssignment pra = strategy.assign(100, 10, 2, tags, -1);
@@ -113,11 +113,11 @@ public class BasicAssignmentStrategyTest {
 
   @Test
   public void testAssignWithDifferentNodeNum() {
-    final ServerNode sn1 = new ServerNode("sn1", "", 0, 0, 0,
+    final ServerNode sn1 = new ServerNode("sn1", "", 0, 0, 0, 0,
         20, 0, tags, true);
-    final ServerNode sn2 = new ServerNode("sn2", "", 0, 0, 0,
+    final ServerNode sn2 = new ServerNode("sn2", "", 0, 0, 0, 0,
         10, 0, tags, true);
-    final ServerNode sn3 = new ServerNode("sn3", "", 0, 0, 0,
+    final ServerNode sn3 = new ServerNode("sn3", "", 0, 0, 0, 0,
         0, 0, tags, true);
 
     clusterManager.add(sn1);
@@ -156,7 +156,7 @@ public class BasicAssignmentStrategyTest {
     Set<String> serverTags = Sets.newHashSet("tag-1");
 
     for (int i = 0; i < 20; ++i) {
-      clusterManager.add(new ServerNode("t1-" + i, "", 0, 0, 0,
+      clusterManager.add(new ServerNode("t1-" + i, "", 0, 0, 0, 0,
           20 - i, 0, serverTags, true));
     }
 
@@ -226,7 +226,7 @@ public class BasicAssignmentStrategyTest {
      */
     serverTags = Sets.newHashSet("tag-2");
     for (int i = 0; i < shuffleNodesMax - 1; ++i) {
-      clusterManager.add(new ServerNode("t2-" + i, "", 0, 0, 0,
+      clusterManager.add(new ServerNode("t2-" + i, "", 0, 0, 0, 0,
           20 - i, 0, serverTags, true));
     }
     pra = strategy.assign(100, 10, 1, serverTags, shuffleNodesMax);

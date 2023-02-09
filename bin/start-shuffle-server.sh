@@ -84,6 +84,7 @@ JVM_ARGS=" -server \
           -XX:+PrintGCDateStamps \
           -XX:+PrintGCTimeStamps \
           -XX:+PrintGCDetails \
+          -XX:MaxDirectMemorySize=40G \
           -Xloggc:./logs/gc-%t.log"
 
 ARGS=""

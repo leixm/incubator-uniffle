@@ -20,6 +20,7 @@ package org.apache.uniffle.server.buffer;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.apache.uniffle.common.util.ByteBufUtils;
 import org.apache.uniffle.server.ShuffleServerMetrics;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -50,7 +51,7 @@ public abstract class BufferTestBase {
     byte[] buf = new byte[len];
     new Random().nextBytes(buf);
     ShufflePartitionedBlock block = new ShufflePartitionedBlock(
-        len, len, ChecksumUtils.getCrc32(buf), atomBlockId.incrementAndGet(), 0, buf);
+        len, len, ChecksumUtils.getCrc32(buf), atomBlockId.incrementAndGet(), 0, ByteBufUtils.wrappedBuffer(buf));
     ShufflePartitionedData data = new ShufflePartitionedData(
         partitionId, new ShufflePartitionedBlock[]{block});
     return data;

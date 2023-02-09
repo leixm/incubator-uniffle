@@ -322,12 +322,14 @@ public class ShuffleBufferManager {
   }
 
   void requirePreAllocatedSize(long delta) {
-    preAllocatedSize.addAndGet(delta);
+    long before = preAllocatedSize.getAndAdd(delta);
+//    LOG.info("requirePreAllocatedSize, before=" + before + ", delta=" + delta + " ,now=" + preAllocatedSize.get());
     ShuffleServerMetrics.gaugeAllocatedBufferSize.set(preAllocatedSize.get());
   }
 
   void releasePreAllocatedSize(long delta) {
-    preAllocatedSize.addAndGet(-delta);
+    long before = preAllocatedSize.getAndAdd(-delta);
+//    LOG.info("releasePreAllocatedSize, before=" + before + ", delta=" + delta + " ,now=" + preAllocatedSize.get());
     ShuffleServerMetrics.gaugeAllocatedBufferSize.set(preAllocatedSize.get());
   }
 

@@ -24,6 +24,7 @@ import com.google.common.collect.Sets;
 import org.apache.uniffle.common.BufferSegment;
 import org.apache.uniffle.common.ShuffleDataResult;
 import org.apache.uniffle.common.ShufflePartitionedBlock;
+import org.apache.uniffle.common.util.ByteBufUtils;
 import org.apache.uniffle.storage.HdfsTestBase;
 import org.apache.uniffle.storage.common.FileBasedShuffleSegment;
 import org.apache.hadoop.conf.Configuration;
@@ -63,7 +64,7 @@ public class HdfsHandlerTest extends HdfsTestBase {
       byte[] buf = new byte[i * 8];
       new Random().nextBytes(buf);
       expectedData.add(buf);
-      blocks.add(new ShufflePartitionedBlock(i * 8, i * 8, i, i, 0, buf));
+      blocks.add(new ShufflePartitionedBlock(i * 8, i * 8, i, i, 0, ByteBufUtils.wrappedBuffer(buf)));
       expectedBlockId.add(Long.valueOf(i));
       expectedIndex.add(new FileBasedShuffleSegment(i, pos, i * 8, i * 8, i, 0));
       pos += i * 8;
@@ -79,7 +80,7 @@ public class HdfsHandlerTest extends HdfsTestBase {
       new Random().nextBytes(buf);
       expectedData.add(buf);
       expectedBlockId.add(Long.valueOf(i));
-      blocksAppend.add(new ShufflePartitionedBlock(i * 8, i * 8, i, i, i, buf));
+      blocksAppend.add(new ShufflePartitionedBlock(i * 8, i * 8, i, i, i, ByteBufUtils.wrappedBuffer(buf)));
       expectedIndex.add(new FileBasedShuffleSegment(i, pos, i * 8, i * 8, i, i));
       pos += i * 8;
     }

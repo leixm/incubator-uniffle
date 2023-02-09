@@ -17,6 +17,8 @@
 
 package org.apache.uniffle.common;
 
+import io.netty.buffer.ByteBuf;
+
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -26,7 +28,7 @@ public class ShufflePartitionedBlock {
   private long crc;
   private long blockId;
   private int uncompressLength;
-  private byte[] data;
+  private ByteBuf data;
   private long taskAttemptId;
 
   public ShufflePartitionedBlock(
@@ -35,7 +37,7 @@ public class ShufflePartitionedBlock {
       long crc,
       long blockId,
       long taskAttemptId,
-      byte[] data) {
+      ByteBuf data) {
     this.length = length;
     this.crc = crc;
     this.blockId = blockId;
@@ -62,12 +64,13 @@ public class ShufflePartitionedBlock {
     return length == that.length
         && crc == that.crc
         && blockId == that.blockId
-        && Arrays.equals(data, that.data);
-  }
+        && uncompressLength == that.uncompressLength
+        && taskAttemptId == that.taskAttemptId;
+   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(length, crc, blockId, Arrays.hashCode(data));
+    return Objects.hash(length, crc, blockId, uncompressLength, taskAttemptId);
   }
 
   public int getLength() {
@@ -94,11 +97,11 @@ public class ShufflePartitionedBlock {
     this.blockId = blockId;
   }
 
-  public byte[] getData() {
+  public ByteBuf getData() {
     return data;
   }
 
-  public void setData(byte[] data) {
+  public void setData(ByteBuf data) {
     this.data = data;
   }
 

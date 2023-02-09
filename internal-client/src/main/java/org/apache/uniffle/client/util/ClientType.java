@@ -18,5 +18,6 @@
 package org.apache.uniffle.client.util;
 
 public enum ClientType {
-  GRPC
+  GRPC,
+  GRPC_NETTY
 }

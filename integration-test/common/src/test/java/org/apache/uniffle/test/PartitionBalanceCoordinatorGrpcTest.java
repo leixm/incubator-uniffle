@@ -68,7 +68,7 @@ public class PartitionBalanceCoordinatorGrpcTest extends CoordinatorTestBase {
     assertEquals(1, response.getPartitionToServers().size());
     for (Map.Entry<Integer, List<ShuffleServerInfo>> entry : response.getPartitionToServers().entrySet()) {
       assertEquals(1, entry.getValue().size());
-      assertEquals(SHUFFLE_SERVER_PORT + 1, entry.getValue().get(0).getPort());
+      assertEquals(SHUFFLE_SERVER_PORT + 1, entry.getValue().get(0).getGrpcPort());
     }
     request = new RssGetShuffleAssignmentsRequest(
         "app1",
@@ -81,7 +81,7 @@ public class PartitionBalanceCoordinatorGrpcTest extends CoordinatorTestBase {
     assertEquals(1, response.getPartitionToServers().size());
     for (Map.Entry<Integer, List<ShuffleServerInfo>> entry : response.getPartitionToServers().entrySet()) {
       assertEquals(1, entry.getValue().size());
-      assertEquals(SHUFFLE_SERVER_PORT + 1, entry.getValue().get(0).getPort());
+      assertEquals(SHUFFLE_SERVER_PORT + 1, entry.getValue().get(0).getGrpcPort());
     }
     request = new RssGetShuffleAssignmentsRequest(
         "app1",
@@ -94,7 +94,7 @@ public class PartitionBalanceCoordinatorGrpcTest extends CoordinatorTestBase {
     assertEquals(1, response.getPartitionToServers().size());
     for (Map.Entry<Integer, List<ShuffleServerInfo>> entry : response.getPartitionToServers().entrySet()) {
       assertEquals(1, entry.getValue().size());
-      assertEquals(SHUFFLE_SERVER_PORT, entry.getValue().get(0).getPort());
+      assertEquals(SHUFFLE_SERVER_PORT, entry.getValue().get(0).getGrpcPort());
     }
   }
 }

@@ -53,6 +53,7 @@ public class AccessClusterLoadCheckerTest {
         "1",
         "1",
         0,
+        0,
         50,
         20,
         30,
@@ -76,6 +77,7 @@ public class AccessClusterLoadCheckerTest {
         "1",
         "1",
         0,
+        0,
         90,
         40,
         10,
@@ -86,6 +88,7 @@ public class AccessClusterLoadCheckerTest {
     ServerNode node3 = new ServerNode(
         "1",
         "1",
+        0,
         0,
         80,
         25,
@@ -98,6 +101,7 @@ public class AccessClusterLoadCheckerTest {
     ServerNode node4 = new ServerNode(
         "1",
         "1",
+        0,
         0,
         75,
         25,

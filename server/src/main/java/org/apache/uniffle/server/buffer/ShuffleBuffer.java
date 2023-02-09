@@ -25,6 +25,7 @@ import java.util.function.Supplier;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import io.netty.buffer.ByteBuf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -110,6 +111,11 @@ public class ShuffleBuffer {
   }
 
   public synchronized void clearInFlushBuffer(long eventId) {
+    List<ShufflePartitionedBlock> spBlocks = inFlushBlockMap.get(eventId);
+    // release all blocks
+    for (ShufflePartitionedBlock spb : spBlocks) {
+      spb.getData().release();
+    }
     inFlushBlockMap.remove(eventId);
   }
 
@@ -210,7 +216,10 @@ public class ShuffleBuffer {
     for (ShufflePartitionedBlock block : readBlocks) {
       // fill shuffle data
       try {
-        System.arraycopy(block.getData(), 0, data, offset, block.getLength());
+        ByteBuf byteBuf = block.getData();
+        byteBuf.readBytes(data, offset, block.getLength());
+        byteBuf.resetReaderIndex();
+//        System.arraycopy(block.getData(), 0, data, offset, block.getLength());
       } catch (Exception e) {
         LOG.error("Unexpect exception for System.arraycopy, length["
             + block.getLength() + "], offset["

@@ -19,6 +19,7 @@ package org.apache.uniffle.common;
 
 import java.util.Arrays;
 
+import org.apache.uniffle.common.util.ByteBufUtils;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -31,7 +32,7 @@ public class ShufflePartitionedDataTest {
     assertEquals("ShufflePartitionedData{partitionId=" + data.getPartitionId() + ", blockList="
         + Arrays.toString(data.getBlockList()) + "}", data.toString());
     ShufflePartitionedData data1 = new ShufflePartitionedData(1,
-        new ShufflePartitionedBlock[]{new ShufflePartitionedBlock(2, 3, 4, 5, 6, new byte[0])});
+        new ShufflePartitionedBlock[]{new ShufflePartitionedBlock(2, 3, 4, 5, 6, ByteBufUtils.wrappedBuffer(new byte[0]))});
     assertEquals("ShufflePartitionedData{partitionId=" + data1.getPartitionId() + ", blockList="
         + Arrays.toString(data1.getBlockList()) + "}", data1.toString());
     ShufflePartitionedData data2 = new ShufflePartitionedData(0, null);

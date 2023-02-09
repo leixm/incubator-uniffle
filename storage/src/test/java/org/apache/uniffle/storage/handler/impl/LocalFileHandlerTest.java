@@ -32,6 +32,7 @@ import org.apache.uniffle.common.ShuffleDataSegment;
 import org.apache.uniffle.common.ShuffleIndexResult;
 import org.apache.uniffle.common.ShufflePartitionedBlock;
 import org.apache.uniffle.common.config.RssBaseConf;
+import org.apache.uniffle.common.util.ByteBufUtils;
 import org.apache.uniffle.common.util.ChecksumUtils;
 import org.apache.uniffle.common.util.RssUtils;
 import org.apache.uniffle.storage.handler.api.ServerReadHandler;
@@ -139,7 +140,7 @@ public class LocalFileHandlerTest {
       new Random().nextBytes(buf);
       long blockId = ATOMIC_LONG.incrementAndGet();
       blocks.add(new ShufflePartitionedBlock(length, length, ChecksumUtils.getCrc32(buf), blockId, 100,
-          buf));
+          ByteBufUtils.wrappedBuffer(buf)));
       expectedData.put(blockId, buf);
       expectedBlockIds.add(blockId);
     }

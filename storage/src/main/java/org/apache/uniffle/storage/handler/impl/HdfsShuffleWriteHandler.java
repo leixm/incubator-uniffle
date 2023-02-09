@@ -23,9 +23,11 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.google.common.annotations.VisibleForTesting;
+import io.netty.buffer.ByteBuf;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.uniffle.common.util.ByteBufUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,7 +99,10 @@ public class HdfsShuffleWriteHandler implements ShuffleWriteHandler {
           long blockId = block.getBlockId();
           long crc = block.getCrc();
           long startOffset = dataWriter.nextOffset();
-          dataWriter.writeData(block.getData());
+          ByteBuf byteBuf = block.getData();
+          byte[] bytes = ByteBufUtils.readBytes(byteBuf);
+          byteBuf.resetReaderIndex();
+          dataWriter.writeData(bytes);
 
           FileBasedShuffleSegment segment = new FileBasedShuffleSegment(
               blockId, startOffset, block.getLength(), block.getUncompressLength(), crc, block.getTaskAttemptId());
