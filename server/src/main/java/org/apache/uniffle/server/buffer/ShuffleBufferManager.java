@@ -224,7 +224,7 @@ public class ShuffleBufferManager {
     boolean isHugePartition = isHugePartition(appId, shuffleId, partitionId);
     // When we use multi storage and trigger single buffer flush, the buffer size should be bigger
     // than rss.server.flush.cold.storage.threshold.size, otherwise cold storage will be useless.
-    if ((isHugePartition || this.bufferFlushEnabled) && buffer.getSize() > this.bufferFlushThreshold) {
+    if (isHugePartition || (this.bufferFlushEnabled && buffer.getSize() > this.bufferFlushThreshold)) {
       flushBuffer(buffer, appId, shuffleId, startPartition, endPartition, isHugePartition);
       return;
     }
