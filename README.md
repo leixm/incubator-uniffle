@@ -172,7 +172,8 @@ rss-xxx.tgz will be generated for deployment
      rss.storage.basePath /data1/rssdata,/data2/rssdata....
      # it's better to config thread num according to local disk num
      rss.server.flush.thread.alive 5
-     rss.server.flush.threadPool.size 10
+     rss.server.flush.local-file.threadPool.size 10
+     rss.server.flush.hdfs.threadPool.size 10
      rss.server.buffer.capacity 40g
      rss.server.read.buffer.capacity 20g
      rss.server.heartbeat.timeout 60000

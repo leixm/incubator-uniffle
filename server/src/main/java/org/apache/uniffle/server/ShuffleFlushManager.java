@@ -39,14 +39,18 @@ import org.slf4j.LoggerFactory;
 import org.apache.uniffle.common.ShuffleDataDistributionType;
 import org.apache.uniffle.common.ShufflePartitionedBlock;
 import org.apache.uniffle.common.config.RssBaseConf;
+import org.apache.uniffle.common.exception.RssException;
 import org.apache.uniffle.common.util.JavaUtils;
 import org.apache.uniffle.common.util.RssUtils;
 import org.apache.uniffle.common.util.ThreadUtils;
 import org.apache.uniffle.server.storage.MultiStorageManager;
 import org.apache.uniffle.server.storage.StorageManager;
+import org.apache.uniffle.storage.common.HdfsStorage;
+import org.apache.uniffle.storage.common.LocalStorage;
 import org.apache.uniffle.storage.common.Storage;
 import org.apache.uniffle.storage.handler.api.ShuffleWriteHandler;
 import org.apache.uniffle.storage.request.CreateShuffleWriteHandlerRequest;
+import org.apache.uniffle.storage.util.StorageType;
 
 public class ShuffleFlushManager {
 
@@ -54,7 +58,8 @@ public class ShuffleFlushManager {
   public static final AtomicLong ATOMIC_EVENT_ID = new AtomicLong(0);
   private final ShuffleServer shuffleServer;
   protected final BlockingQueue<ShuffleDataFlushEvent> flushQueue = Queues.newLinkedBlockingQueue();
-  private final Executor threadPoolExecutor;
+  private Executor localFileThreadPoolExecutor;
+  private Executor hdfsThreadPoolExecutor;
   private final List<String> storageBasePaths;
   private final String shuffleServerId;
   private final String storageType;
@@ -86,7 +91,7 @@ public class ShuffleFlushManager {
 
     storageBasePaths = RssUtils.getConfiguredLocalDirs(shuffleServerConf);
     pendingEventTimeoutSec = shuffleServerConf.getLong(ShuffleServerConf.PENDING_EVENT_TIMEOUT_SEC);
-    threadPoolExecutor = createFlushEventExecutor();
+    initFlushEventExecutor();
     startEventProcessor();
     // todo: extract a class named Service, and support stop method
     Thread thread = new Thread("PendingEventProcessThread") {
@@ -118,14 +123,24 @@ public class ShuffleFlushManager {
     processEventThread.start();
   }
 
-  protected Executor createFlushEventExecutor() {
+  protected void initFlushEventExecutor() {
+    if (StorageType.withLocalfile(StorageType.valueOf(storageType))) {
+      int poolSize = shuffleServerConf.getInteger(ShuffleServerConf.SERVER_FLUSH_LOCALFILE_THREAD_POOL_SIZE);
+      localFileThreadPoolExecutor = createFlushEventExecutor(poolSize, "LocalFileFlushEventThreadPool");
+    }
+    if (StorageType.withHDFS(StorageType.valueOf(storageType))) {
+      int poolSize = shuffleServerConf.getInteger(ShuffleServerConf.SERVER_FLUSH_HDFS_THREAD_POOL_SIZE);
+      hdfsThreadPoolExecutor = createFlushEventExecutor(poolSize, "HdfsFlushEventThreadPool");
+    }
+  }
+
+  protected Executor createFlushEventExecutor(int poolSize, String threadFactoryName) {
     int waitQueueSize = shuffleServerConf.getInteger(
         ShuffleServerConf.SERVER_FLUSH_THREAD_POOL_QUEUE_SIZE);
     BlockingQueue<Runnable> waitQueue = Queues.newLinkedBlockingQueue(waitQueueSize);
-    int poolSize = shuffleServerConf.getInteger(ShuffleServerConf.SERVER_FLUSH_THREAD_POOL_SIZE);
     long keepAliveTime = shuffleServerConf.getLong(ShuffleServerConf.SERVER_FLUSH_THREAD_ALIVE);
     return new ThreadPoolExecutor(poolSize, poolSize, keepAliveTime, TimeUnit.SECONDS, waitQueue,
-        ThreadUtils.getThreadFactory("FlushEventThreadPool"));
+        ThreadUtils.getThreadFactory(threadFactoryName));
   }
 
   public void addToFlushQueue(ShuffleDataFlushEvent event) {
@@ -145,7 +160,14 @@ public class ShuffleFlushManager {
   protected void processNextEvent() {
     try {
       ShuffleDataFlushEvent event = flushQueue.take();
-      threadPoolExecutor.execute(() -> processEvent(event));
+      Storage storage = storageManager.selectStorage(event);
+      if (storage instanceof HdfsStorage) {
+        hdfsThreadPoolExecutor.execute(() -> processEvent(event));
+      } else if (storage instanceof LocalStorage) {
+        localFileThreadPoolExecutor.execute(() -> processEvent(event));
+      } else {
+        throw new RssException("Unexpected storage type!");
+      }
     } catch (Exception e) {
       LOG.error("Exception happened when process event.", e);
     }
