@@ -93,6 +93,9 @@ public class ShuffleServerMetrics {
   private static final String HUGE_PARTITION_NUM = "huge_partition_num";
   private static final String APP_WITH_HUGE_PARTITION_NUM = "app_with_huge_partition_num";
 
+  private static final String LOCAL_FILE_EVENT_FLUSH_NUM = "local_file_event_flush_num";
+  private static final String HDFS_EVENT_FLUSH_NUM = "hdfs_event_flush_num";
+
   public static Counter counterTotalAppNum;
   public static Counter counterTotalAppWithHugePartitionNum;
   public static Counter counterTotalPartitionNum;
@@ -152,6 +155,8 @@ public class ShuffleServerMetrics {
   public static Map<String, Counter> counterRemoteStorageRetryWrite;
   public static Map<String, Counter> counterRemoteStorageFailedWrite;
   public static Map<String, Counter> counterRemoteStorageSuccessWrite;
+  public static Counter counterLocalFileEventFlush;
+  public static Counter counterHdfsEventFlush;
 
   private static MetricsManager metricsManager;
   private static boolean isRegister = false;
@@ -305,6 +310,9 @@ public class ShuffleServerMetrics {
 
     gaugeHugePartitionNum = metricsManager.addGauge(HUGE_PARTITION_NUM);
     gaugeAppWithHugePartitionNum = metricsManager.addGauge(APP_WITH_HUGE_PARTITION_NUM);
+
+    counterLocalFileEventFlush = metricsManager.addCounter(LOCAL_FILE_EVENT_FLUSH_NUM);
+    counterHdfsEventFlush = metricsManager.addCounter(HDFS_EVENT_FLUSH_NUM);
   }
 
 }

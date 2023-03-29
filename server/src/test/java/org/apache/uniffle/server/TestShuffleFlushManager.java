@@ -32,11 +32,6 @@ public class TestShuffleFlushManager extends ShuffleFlushManager {
     // do nothing
   }
 
-  @Override
-  protected Executor createFlushEventExecutor(int poolSize, String threadFactoryName) {
-    return Runnable::run;
-  }
-
   public void flush() {
     while (!flushQueue.isEmpty()) {
       processNextEvent();
