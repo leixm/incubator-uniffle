@@ -17,8 +17,6 @@
 
 package org.apache.uniffle.server;
 
-import java.util.concurrent.Executor;
-
 import org.apache.uniffle.server.storage.StorageManager;
 
 public class TestShuffleFlushManager extends ShuffleFlushManager {
