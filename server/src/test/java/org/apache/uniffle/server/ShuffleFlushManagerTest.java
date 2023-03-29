@@ -601,6 +601,8 @@ public class ShuffleFlushManagerTest extends HdfsTestBase {
         storageManager
     );
 
+    ShuffleServerMetrics.counterLocalFileEventFlush.clear();
+    ShuffleServerMetrics.counterHdfsEventFlush.clear();
     // case1: normally written to local storage
     ShuffleDataFlushEvent event = createShuffleDataFlushEvent(appId, 1, 1, 1, null, 100);
     flushManager.addToFlushQueue(event);
