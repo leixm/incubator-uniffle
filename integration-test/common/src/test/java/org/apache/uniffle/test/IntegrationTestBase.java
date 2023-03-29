@@ -120,8 +120,8 @@ public abstract class IntegrationTestBase extends HdfsTestBase {
     serverConf.setString("rss.server.hadoop.dfs.replication", "2");
     serverConf.setLong("rss.server.disk.capacity", 10L * 1024L * 1024L * 1024L);
     serverConf.setBoolean("rss.server.health.check.enable", false);
-    serverConf.setInteger("rss.server.flush.local-file.threadPool.size", 1);
-    serverConf.setInteger("rss.server.flush.hdfs.threadPool.size", 1);
+    serverConf.setInteger("rss.server.flush.local-file.threadPool.size", 3);
+    serverConf.setInteger("rss.server.flush.hdfs.threadPool.size", 3);
     serverConf.setBoolean(ShuffleServerConf.RSS_TEST_MODE_ENABLE, true);
     serverConf.set(ShuffleServerConf.SERVER_TRIGGER_FLUSH_CHECK_INTERVAL, 500L);
     return serverConf;
