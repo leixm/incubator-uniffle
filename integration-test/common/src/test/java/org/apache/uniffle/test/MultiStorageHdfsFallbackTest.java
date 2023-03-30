@@ -33,6 +33,7 @@ public class MultiStorageHdfsFallbackTest extends MultiStorageFaultToleranceBase
 
   @BeforeAll
   public static void setupServers(@TempDir File tmpDir) throws Exception {
+    setUpHdfs(tmpDir);
     final CoordinatorConf coordinatorConf = getCoordinatorConf();
     ShuffleServerConf shuffleServerConf = getShuffleServerConf();
     String basePath = generateBasePath(tmpDir);

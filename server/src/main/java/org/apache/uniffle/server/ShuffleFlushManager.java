@@ -192,7 +192,7 @@ public class ShuffleFlushManager {
       if (!storage.canWrite()) {
         // todo: Could we add an interface supportPending for storageManager
         //       to unify following logic of multiple different storage managers
-        if (event.getRetryTimes() < retryMax) {
+        if (event.getRetryTimes() <= retryMax) {
           if (event.isPended()) {
             LOG.error("Drop this event directly due to already having entered pending queue. event: {}", event);
             return true;
@@ -226,7 +226,7 @@ public class ShuffleFlushManager {
       if (writeSuccess) {
         updateCommittedBlockIds(event.getAppId(), event.getShuffleId(), blocks);
         ShuffleServerMetrics.incStorageSuccessCounter(storage.getStorageHost());
-      } else if (event.getRetryTimes() < retryMax) {
+      } else if (event.getRetryTimes() <= retryMax) {
         if (event.isPended()) {
           LOG.error("Drop this event directly due to already having entered pending queue. event: {}", event);
         }
