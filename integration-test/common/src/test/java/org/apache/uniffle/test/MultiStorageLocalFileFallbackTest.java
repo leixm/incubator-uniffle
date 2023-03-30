@@ -37,6 +37,7 @@ public class MultiStorageLocalFileFallbackTest extends MultiStorageFaultToleranc
   @BeforeAll
   public static void setupServers(@TempDir File tmpDir) throws Exception {
     final CoordinatorConf coordinatorConf = getCoordinatorConf();
+
     ShuffleServerConf shuffleServerConf = getShuffleServerConf();
     String basePath = generateBasePath(tmpDir);
     shuffleServerConf.setDouble(ShuffleServerConf.CLEANUP_THRESHOLD, 0.0);
