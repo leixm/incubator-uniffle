@@ -49,7 +49,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public abstract class MultiStorageFaultToleranceBase extends ShuffleReadWriteBase {
   private ShuffleServerGrpcClient shuffleServerClient;
-  private static String REMOTE_STORAGE = HDFS_URI + "rss/multi_storage_fault";
+  private static String REMOTE_STORAGE;
 
   @BeforeEach
   public void createClient() {
@@ -66,6 +66,7 @@ public abstract class MultiStorageFaultToleranceBase extends ShuffleReadWriteBas
 
   @Test
   public void fallbackTest() throws Exception {
+    REMOTE_STORAGE = HDFS_URI + "rss/multi_storage_fault";
     String appId = "fallback_test_" + this.getClass().getSimpleName();
     Map<Long, byte[]> expectedData = Maps.newHashMap();
     Map<Integer, List<Integer>> map = Maps.newHashMap();
