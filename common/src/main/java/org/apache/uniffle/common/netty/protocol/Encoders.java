@@ -18,9 +18,13 @@
 package org.apache.uniffle.common.netty.protocol;
 
 import java.util.List;
+import java.util.Map;
 
 import io.netty.buffer.ByteBuf;
 
+import org.apache.uniffle.common.BufferSegment;
+import org.apache.uniffle.common.PartitionRange;
+import org.apache.uniffle.common.RemoteStorageInfo;
 import org.apache.uniffle.common.ShuffleBlockInfo;
 import org.apache.uniffle.common.ShuffleServerInfo;
 import org.apache.uniffle.common.util.ByteBufUtils;
@@ -65,6 +69,84 @@ public class Encoders {
       encodeLength += encodeLengthOfShuffleServerInfo(shuffleServerInfo);
     }
     return encodeLength;
+  }
+
+
+  public static void encodePartitionToBlockIds(Map<Integer, List<Long>> partitionToBlockIds, ByteBuf byteBuf) {
+    byteBuf.writeInt(partitionToBlockIds.size());
+    for (Map.Entry<Integer, List<Long>> entry : partitionToBlockIds.entrySet()) {
+      byteBuf.writeInt(entry.getKey());
+      List<Long> blocks = entry.getValue();
+      byteBuf.writeInt(blocks.size());
+      for (long block : blocks) {
+        byteBuf.writeLong(block);
+      }
+    }
+  }
+
+  public static int encodeLengthOfPartitionToBlockIds(Map<Integer, List<Long>> partitionToBlockIds) {
+    int encodeLength = Integer.BYTES + 2 * Integer.BYTES * partitionToBlockIds.size();
+    for (List<Long> blocks : partitionToBlockIds.values()) {
+      encodeLength += blocks.size() * Long.BYTES;
+    }
+    return encodeLength;
+  }
+
+  public static void encodePartitionIds(List<Integer> partitions, ByteBuf byteBuf) {
+    byteBuf.writeInt(partitions.size());
+    for (Integer partitionId : partitions) {
+      byteBuf.writeInt(partitionId);
+    }
+  }
+
+  public static int encodeLengthOfPartitionIds(List<Integer> partitions) {
+    return partitions.size() + partitions.size() * Integer.BYTES;
+  }
+
+  public static void encodePartitionRanges(List<PartitionRange> partitionRanges, ByteBuf byteBuf) {
+    byteBuf.writeInt(partitionRanges.size());
+    for (PartitionRange partitionRange : partitionRanges) {
+      byteBuf.writeInt(partitionRange.getStart());
+      byteBuf.writeInt(partitionRange.getEnd());
+    }
+  }
+
+  public static int encodeLengthOfPartitionRanges(List<PartitionRange> partitionRanges) {
+    return Integer.BYTES + 2 * Integer.BYTES * partitionRanges.size();
+  }
+
+  public static void encodeRemoteStorageInfo(RemoteStorageInfo remoteStorageInfo, ByteBuf byteBuf) {
+    ByteBufUtils.writeLengthAndString(byteBuf, remoteStorageInfo.getPath());
+    Map<String, String> confItems = remoteStorageInfo.getConfItems();
+    byteBuf.writeInt(confItems.size());
+    for (Map.Entry<String, String> entry : confItems.entrySet()) {
+      ByteBufUtils.writeLengthAndString(byteBuf, entry.getKey());
+      ByteBufUtils.writeLengthAndString(byteBuf, entry.getValue());
+    }
+  }
+
+  public static int encodeLengthOfRemoteStorageInfo(RemoteStorageInfo remoteStorageInfo) {
+    int encodeLength = ByteBufUtils.encodedLength(remoteStorageInfo.getPath()) + Integer.BYTES;
+    for (Map.Entry<String, String> entry : remoteStorageInfo.getConfItems().entrySet()) {
+      encodeLength += ByteBufUtils.encodedLength(entry.getKey()) + ByteBufUtils.encodedLength(entry.getValue());
+    }
+    return encodeLength;
+  }
+
+  public static void encodeBufferSegments(List<BufferSegment> bufferSegments, ByteBuf byteBuf) {
+    byteBuf.writeInt(bufferSegments.size());
+    for (BufferSegment bufferSegment : bufferSegments) {
+      byteBuf.writeLong(bufferSegment.getBlockId());
+      byteBuf.writeInt(bufferSegment.getOffset());
+      byteBuf.writeInt(bufferSegment.getLength());
+      byteBuf.writeInt(bufferSegment.getUncompressLength());
+      byteBuf.writeLong(bufferSegment.getCrc());
+      byteBuf.writeLong(bufferSegment.getTaskAttemptId());
+    }
+  }
+
+  public static int encodeLengthOfBufferSegments(List<BufferSegment> bufferSegments) {
+    return Integer.BYTES + bufferSegments.size() * (3 * Long.BYTES + 3 * Integer.BYTES);
   }
 
 }

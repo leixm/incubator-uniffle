@@ -18,10 +18,15 @@
 package org.apache.uniffle.common.netty.protocol;
 
 import java.util.List;
+import java.util.Map;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import io.netty.buffer.ByteBuf;
 
+import org.apache.uniffle.common.BufferSegment;
+import org.apache.uniffle.common.PartitionRange;
+import org.apache.uniffle.common.RemoteStorageInfo;
 import org.apache.uniffle.common.ShuffleBlockInfo;
 import org.apache.uniffle.common.ShuffleServerInfo;
 import org.apache.uniffle.common.util.ByteBufUtils;
@@ -53,4 +58,66 @@ public class Decoders {
     return new ShuffleBlockInfo(shuffleId, partId, blockId,
         length, crc, data, serverInfos, uncompressLength, freeMemory, taskAttemptId);
   }
+
+  public static Map<Integer, List<Long>> decodePartitionToBlockIds(ByteBuf byteBuf) {
+    Map<Integer, List<Long>> partitionToBlockIds = Maps.newHashMap();
+    int mapSize = byteBuf.readInt();
+    for (int i = 0; i < mapSize; i++) {
+      int partitionId = byteBuf.readInt();
+      int blockListSize = byteBuf.readInt();
+      List<Long> blocks = Lists.newArrayList();
+      for (int j = 0; j < blockListSize; j++) {
+        blocks.add(byteBuf.readLong());
+      }
+      partitionToBlockIds.put(partitionId, blocks);
+    }
+    return partitionToBlockIds;
+  }
+
+  public static List<Integer> decodePartitionIds(ByteBuf byteBuf) {
+    List<Integer> partitionIds = Lists.newArrayList();
+    int size = byteBuf.readInt();
+    for (int i = 0; i < size; i++) {
+      partitionIds.add(byteBuf.readInt());
+    }
+    return partitionIds;
+  }
+
+  public static List<PartitionRange> decodePartitionRanges(ByteBuf byteBuf) {
+    List<PartitionRange> partitionRanges = Lists.newArrayList();
+    int size = byteBuf.readInt();
+    for (int i = 0; i < size; i++) {
+      int start = byteBuf.readInt();
+      int end = byteBuf.readInt();
+      partitionRanges.add(new PartitionRange(start, end));
+    }
+    return partitionRanges;
+  }
+
+  public static RemoteStorageInfo decodeRemoteStorageInfo(ByteBuf byteBuf) {
+    String path = ByteBufUtils.readLengthAndString(byteBuf);
+    int size = byteBuf.readInt();
+    Map<String, String> confItems = Maps.newHashMap();
+    for (int i = 0; i < size; i++) {
+      confItems.put(ByteBufUtils.readLengthAndString(byteBuf), ByteBufUtils.readLengthAndString(byteBuf));
+    }
+    return new RemoteStorageInfo(path, confItems);
+  }
+
+  public static List<BufferSegment> decodeBufferSegments(ByteBuf byteBuf) {
+    List<BufferSegment> bufferSegments = Lists.newArrayList();
+    int size = byteBuf.readInt();
+    for (int i = 0; i < size; i++) {
+      long blockId = byteBuf.readLong();
+      int offset = byteBuf.readInt();
+      int length = byteBuf.readInt();
+      int uncompressLength = byteBuf.readInt();
+      long crc = byteBuf.readLong();
+      long taskAttemptId = byteBuf.readLong();
+      BufferSegment bufferSegment = new BufferSegment(blockId, offset, length, uncompressLength, crc, taskAttemptId);
+      bufferSegments.add(bufferSegment);
+    }
+    return bufferSegments;
+  }
+
 }

@@ -15,45 +15,43 @@
  * limitations under the License.
  */
 
-package org.apache.uniffle.common;
+package org.apache.uniffle.common.netty.protocol;
 
 import io.netty.buffer.ByteBuf;
 
-import org.apache.uniffle.common.netty.EncodeException;
-import org.apache.uniffle.common.netty.protocol.Encodable;
+import org.apache.uniffle.common.util.ByteBufUtils;
 
-/**
- * The type of shuffle data distribution of a single partition.
- */
-public enum ShuffleDataDistributionType implements Encodable {
-  NORMAL(0),
-  LOCAL_ORDER(1);
+public class AppHeartBeatRequest extends RequestMessage {
+  private String appId;
 
-  private final byte id;
+  public AppHeartBeatRequest(long requestId, String appId) {
+    super(requestId);
+    this.appId = appId;
+  }
 
-  ShuffleDataDistributionType(int id) {
-    this.id = (byte) id;
+  @Override
+  public Type type() {
+    return Type.APP_HEART_BEAT_REQUEST;
   }
 
   @Override
   public int encodedLength() {
-    return 1;
+    return REQUEST_ID_ENCODE_LENGTH + ByteBufUtils.encodedLength(appId);
   }
 
   @Override
-  public void encode(ByteBuf buf) throws EncodeException {
-    buf.writeByte(id);
+  public void encode(ByteBuf buf) {
+    buf.writeLong(getRequestId());
+    ByteBufUtils.writeLengthAndString(buf, appId);
   }
 
-  public static ShuffleDataDistributionType decode(ByteBuf buf) {
-    byte id = buf.readByte();
-    switch (id) {
-      case 0:
-        return NORMAL;
-      case 1:
-        return LOCAL_ORDER;
-      default:
-        throw new IllegalArgumentException("Unknown ShuffleDataDistributionType: " + id);
-    }
+  public static AppHeartBeatRequest decode(ByteBuf byteBuf) {
+    long requestId = byteBuf.readLong();
+    String appId = ByteBufUtils.readLengthAndString(byteBuf);
+    return new AppHeartBeatRequest(requestId, appId);
+  }
+
+  public String getAppId() {
+    return appId;
   }
 }
