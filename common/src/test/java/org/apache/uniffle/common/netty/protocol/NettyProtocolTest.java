@@ -35,8 +35,8 @@ import org.apache.uniffle.common.RemoteStorageInfo;
 import org.apache.uniffle.common.ShuffleBlockInfo;
 import org.apache.uniffle.common.ShuffleDataDistributionType;
 import org.apache.uniffle.common.ShuffleServerInfo;
-import org.apache.uniffle.common.util.RssUtils;
 import org.apache.uniffle.common.rpc.StatusCode;
+import org.apache.uniffle.common.util.RssUtils;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -121,7 +121,7 @@ public class NettyProtocolTest {
   }
 
   @Test
-  public void GetLocalShuffleDataRequest() {
+  public void testGetLocalShuffleDataRequest() {
     GetLocalShuffleDataRequest getLocalShuffleDataRequest = new GetLocalShuffleDataRequest(1, "test_app",
         1, 1, 1, 100, 0, 200, System.currentTimeMillis());
     int encodeLength = getLocalShuffleDataRequest.encodedLength();
@@ -285,7 +285,8 @@ public class NettyProtocolTest {
     assertEquals(reportShuffleResultRequest.getBitmapNum(), reportShuffleResultRequest1.getBitmapNum());
     assertEquals(reportShuffleResultRequest.getShuffleId(), reportShuffleResultRequest1.getShuffleId());
     assertEquals(reportShuffleResultRequest.getTaskAttemptId(), reportShuffleResultRequest1.getTaskAttemptId());
-    assertEquals(reportShuffleResultRequest.getPartitionToBlockIds(), reportShuffleResultRequest1.getPartitionToBlockIds());
+    assertEquals(reportShuffleResultRequest.getPartitionToBlockIds(),
+        reportShuffleResultRequest1.getPartitionToBlockIds());
   }
 
   @Test
