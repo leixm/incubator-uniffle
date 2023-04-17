@@ -90,7 +90,9 @@ public class NettyProtocolTest {
     rpcResponse.encode(byteBuf);
     assertEquals(byteBuf.readableBytes(), encodeLength);
     RpcResponse rpcResponse1 = RpcResponse.decode(byteBuf);
-    assertTrue(rpcResponse.equals(rpcResponse1));
+    assertEquals(rpcResponse.getRequestId(), rpcResponse1.getRequestId());
+    assertEquals(rpcResponse.getRetMessage(), rpcResponse1.getRetMessage());
+    assertEquals(rpcResponse.getStatusCode(), rpcResponse1.getStatusCode());
     assertEquals(rpcResponse.encodedLength(), rpcResponse1.encodedLength());
     byteBuf.release();
   }
