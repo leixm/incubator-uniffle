@@ -17,8 +17,6 @@
 
 package org.apache.uniffle.common.netty.protocol;
 
-import java.util.Objects;
-
 import io.netty.buffer.ByteBuf;
 
 import org.apache.uniffle.common.rpc.StatusCode;
