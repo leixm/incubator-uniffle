@@ -21,9 +21,11 @@ import java.io.File;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.google.common.collect.RangeMap;
+import com.google.common.util.concurrent.Uninterruptibles;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -595,6 +597,7 @@ public class ShuffleBufferManagerTest extends BufferTestBase {
     shuffleBufferManager.cacheShuffleData(appId, smallShuffleId, false, createData(0, 31));
     assertEquals(96 + 63, shuffleBufferManager.getUsedMemory());
     shuffleFlushManager.flush();
+    Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
     // small shuffle id is kept in memory
     assertEquals(63, shuffleBufferManager.getUsedMemory());
     assertEquals(0, shuffleBufferManager.getInFlushSize());
@@ -604,6 +607,7 @@ public class ShuffleBufferManagerTest extends BufferTestBase {
     shuffleBufferManager.cacheShuffleData(appId, smallShuffleId, false, createData(0, 31));
     assertEquals(63 * 3, shuffleBufferManager.getUsedMemory());
     shuffleFlushManager.flush();
+    Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
     assertEquals(0, shuffleBufferManager.getUsedMemory());
     assertEquals(0, shuffleBufferManager.getInFlushSize());
 
@@ -613,6 +617,7 @@ public class ShuffleBufferManagerTest extends BufferTestBase {
     shuffleBufferManager.cacheShuffleData(appId, smallShuffleIdTwo, false, createData(0, 20));
     assertEquals(54 + 53 + 52, shuffleBufferManager.getUsedMemory());
     shuffleFlushManager.flush();
+    Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
     assertEquals(52, shuffleBufferManager.getUsedMemory());
     assertEquals(0, shuffleBufferManager.getInFlushSize());
   }
