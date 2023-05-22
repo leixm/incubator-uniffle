@@ -21,13 +21,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Queues;
-import com.google.common.util.concurrent.Uninterruptibles;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.roaringbitmap.longlong.Roaring64NavigableMap;
@@ -51,7 +46,6 @@ public class ShuffleFlushManager {
   private static final Logger LOG = LoggerFactory.getLogger(ShuffleFlushManager.class);
   public static final AtomicLong ATOMIC_EVENT_ID = new AtomicLong(0);
   private final ShuffleServer shuffleServer;
-  protected final BlockingQueue<ShuffleDataFlushEvent> flushQueue = Queues.newLinkedBlockingQueue();
   private final List<String> storageBasePaths;
   private final String storageType;
   private final int storageDataReplica;
@@ -62,9 +56,7 @@ public class ShuffleFlushManager {
   private final int retryMax;
 
   private final StorageManager storageManager;
-  private final BlockingQueue<PendingShuffleFlushEvent> pendingEvents = Queues.newLinkedBlockingQueue();
   private final long pendingEventTimeoutSec;
-  private int processPendingEventIndex = 0;
   private FlushEventHandler eventHandler;
 
   public ShuffleFlushManager(ShuffleServerConf shuffleServerConf, ShuffleServer shuffleServer,
@@ -79,59 +71,11 @@ public class ShuffleFlushManager {
 
     storageBasePaths = RssUtils.getConfiguredLocalDirs(shuffleServerConf);
     pendingEventTimeoutSec = shuffleServerConf.getLong(ShuffleServerConf.PENDING_EVENT_TIMEOUT_SEC);
-    eventHandler = new StorageTypeFlushEventHandler(shuffleServerConf, this, storageManager);
-    startEventProcessor();
-    // todo: extract a class named Service, and support stop method
-    Thread thread = new Thread("PendingEventProcessThread") {
-      @Override
-      public void run() {
-        for (; ; ) {
-          try {
-            processPendingEvents();
-            processPendingEventIndex = (processPendingEventIndex + 1) % 1000;
-            if (processPendingEventIndex == 0) {
-              // todo: get sleep interval from configuration
-              Uninterruptibles.sleepUninterruptibly(1, TimeUnit.SECONDS);
-            }
-          } catch (Exception e) {
-            LOG.error(getName() + " happened exception: ", e);
-          }
-        }
-      }
-    };
-    thread.setDaemon(true);
-    thread.start();
-  }
-
-  private void startEventProcessor() {
-    // the thread for flush data
-    Thread processEventThread = new Thread(this::eventLoop);
-    processEventThread.setName("ProcessEventThread");
-    processEventThread.setDaemon(true);
-    processEventThread.start();
+    eventHandler = new DefaultFlushEventHandler(shuffleServerConf, storageManager, this::processEvent);
   }
 
   public void addToFlushQueue(ShuffleDataFlushEvent event) {
-    if (!flushQueue.offer(event)) {
-      LOG.warn("Flush queue is full, discard event: " + event);
-    } else {
-      ShuffleServerMetrics.gaugeEventQueueSize.inc();
-    }
-  }
-
-  protected void eventLoop() {
-    while (true) {
-      processNextEvent();
-    }
-  }
-
-  protected void processNextEvent() {
-    try {
-      ShuffleDataFlushEvent event = flushQueue.take();
-      eventHandler.handle(event);
-    } catch (Exception e) {
-      LOG.error("Exception happened when process event.", e);
-    }
+    eventHandler.handle(event);
   }
 
   public void processEvent(ShuffleDataFlushEvent event) {
@@ -180,9 +124,17 @@ public class ShuffleFlushManager {
         return true;
       }
 
-      Storage storage = storageManager.selectStorage(event);
+      Storage storage = event.getUnderStorage();
       if (storage == null) {
         LOG.error("Storage selected is null and this should not happen. event: {}", event);
+        return true;
+      }
+
+      if (event.isPended()
+              && System.currentTimeMillis() - event.getStartPendingTime() > pendingEventTimeoutSec * 1000L) {
+        ShuffleServerMetrics.counterTotalDroppedEventNum.inc();
+        LOG.error("Flush event cannot be flushed for {} sec, the event {} is dropped",
+            pendingEventTimeoutSec, event);
         return true;
       }
 
@@ -197,7 +149,7 @@ public class ShuffleFlushManager {
           event.increaseRetryTimes();
           ShuffleServerMetrics.incStorageRetryCounter(storage.getStorageHost());
           event.markPended();
-          addPendingEvents(event);
+          eventHandler.handle(event);
         }
         return false;
       }
@@ -231,7 +183,7 @@ public class ShuffleFlushManager {
         event.increaseRetryTimes();
         ShuffleServerMetrics.incStorageRetryCounter(storage.getStorageHost());
         event.markPended();
-        addPendingEvents(event);
+        eventHandler.handle(event);
       }
     } catch (Throwable throwable) {
       // just log the error, don't throw the exception and stop the flush thread
@@ -301,81 +253,16 @@ public class ShuffleFlushManager {
   }
 
   public int getEventNumInFlush() {
-    return flushQueue.size();
+    return eventHandler.getEventNumInFlush();
   }
 
   public Configuration getHadoopConf() {
     return hadoopConf;
   }
 
-  @VisibleForTesting
-  void processPendingEvents() throws Exception {
-    PendingShuffleFlushEvent event = pendingEvents.take();
-    Storage storage = storageManager.selectStorage(event.getEvent());
-    if (storage == null) {
-      dropPendingEvent(event);
-      LOG.error("Flush event cannot be flushed because of application related was cleared, {}", event.getEvent());
-      return;
-    }
-    if (System.currentTimeMillis() - event.getCreateTimeStamp() > pendingEventTimeoutSec * 1000L) {
-      dropPendingEvent(event);
-      LOG.error("Flush event cannot be flushed for {} sec, the event {} is dropped",
-          pendingEventTimeoutSec, event.getEvent());
-      return;
-    }
-    // storage maybe null if the application cache was cleared already
-    // add event to flush queue, and it will be released
-    if (storage.canWrite()) {
-      addToFlushQueue(event.getEvent());
-      return;
-    }
-    addPendingEventsInternal(event);
-  }
-
-  private void dropPendingEvent(PendingShuffleFlushEvent event) {
-    ShuffleServerMetrics.counterTotalDroppedEventNum.inc();
-    event.getEvent().doCleanup();
-  }
-
-  @VisibleForTesting
-  void addPendingEvents(ShuffleDataFlushEvent event) {
-    addPendingEventsInternal(new PendingShuffleFlushEvent(event));
-  }
-
-  @VisibleForTesting
-  int getPendingEventsSize() {
-    return pendingEvents.size();
-  }
-
-  private void addPendingEventsInternal(PendingShuffleFlushEvent event) {
-    boolean pendingEventsResult = pendingEvents.offer(event);
-    ShuffleDataFlushEvent flushEvent = event.getEvent();
-    if (!pendingEventsResult) {
-      LOG.error("Post pendingEvent queue fail!! App: " + flushEvent.getAppId() + " Shuffle "
-          + flushEvent.getShuffleId() + " Partition " + flushEvent.getStartPartition());
-    }
-  }
-
   public void removeResourcesOfShuffleId(String appId, Collection<Integer> shuffleIds) {
     Optional.ofNullable(committedBlockIds.get(appId))
         .ifPresent(shuffleIdToBlockIds -> shuffleIds.forEach(shuffleIdToBlockIds::remove));
-  }
-
-  private static class PendingShuffleFlushEvent {
-    private final ShuffleDataFlushEvent event;
-    private final long createTimeStamp = System.currentTimeMillis();
-
-    PendingShuffleFlushEvent(ShuffleDataFlushEvent event) {
-      this.event = event;
-    }
-
-    public ShuffleDataFlushEvent getEvent() {
-      return event;
-    }
-
-    public long getCreateTimeStamp() {
-      return createTimeStamp;
-    }
   }
 
   public ShuffleDataDistributionType getDataDistributionType(String appId) {

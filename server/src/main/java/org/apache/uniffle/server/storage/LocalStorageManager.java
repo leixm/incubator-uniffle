@@ -181,6 +181,7 @@ public class LocalStorageManager extends SingleStorageManager {
               storage.getBasePath(), event);
         }
       } else {
+        event.setUnderStorage(storage);
         return storage;
       }
     }
@@ -206,6 +207,7 @@ public class LocalStorageManager extends SingleStorageManager {
             event.setUnderStorage(selectedStorage);
             return selectedStorage;
           }
+          event.setUnderStorage(localStorage);
           return localStorage;
         });
   }
