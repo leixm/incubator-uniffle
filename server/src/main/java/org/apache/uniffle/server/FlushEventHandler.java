@@ -17,23 +17,6 @@
 
 package org.apache.uniffle.server;
 
-import org.apache.uniffle.server.storage.StorageManager;
-
-public class TestShuffleFlushManager extends ShuffleFlushManager {
-  public TestShuffleFlushManager(ShuffleServerConf shuffleServerConf, String shuffleServerId,
-                                 ShuffleServer shuffleServer, StorageManager storageManager) {
-    super(shuffleServerConf, shuffleServer, storageManager);
-  }
-
-  @Override
-  protected void eventLoop() {
-    // do nothing
-  }
-
-  public void flush() {
-    while (!flushQueue.isEmpty()) {
-      processNextEvent();
-    }
-  }
-
+public interface FlushEventHandler {
+  void handle(ShuffleDataFlushEvent event);
 }
