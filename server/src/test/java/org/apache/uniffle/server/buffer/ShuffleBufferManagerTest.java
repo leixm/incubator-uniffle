@@ -44,7 +44,6 @@ import org.apache.uniffle.server.ShuffleServer;
 import org.apache.uniffle.server.ShuffleServerConf;
 import org.apache.uniffle.server.ShuffleServerMetrics;
 import org.apache.uniffle.server.ShuffleTaskManager;
-import org.apache.uniffle.server.TestShuffleFlushManager;
 import org.apache.uniffle.server.storage.StorageManager;
 import org.apache.uniffle.server.storage.StorageManagerFactory;
 import org.apache.uniffle.storage.util.StorageType;
@@ -579,8 +578,7 @@ public class ShuffleBufferManagerTest extends BufferTestBase {
     serverConf.set(ShuffleServerConf.SERVER_SHUFFLE_FLUSH_THRESHOLD, 64L);
 
     StorageManager storageManager = StorageManagerFactory.getInstance().createStorageManager(conf);
-    TestShuffleFlushManager shuffleFlushManager = new TestShuffleFlushManager(conf,
-        "serverId", mockShuffleServer, storageManager);
+    ShuffleFlushManager shuffleFlushManager = new ShuffleFlushManager(conf, mockShuffleServer, storageManager);
     shuffleBufferManager = new ShuffleBufferManager(serverConf, shuffleFlushManager);
 
     String appId = "shuffleFlushTest";
@@ -596,7 +594,7 @@ public class ShuffleBufferManagerTest extends BufferTestBase {
     assertEquals(96, shuffleBufferManager.getUsedMemory());
     shuffleBufferManager.cacheShuffleData(appId, smallShuffleId, false, createData(0, 31));
     assertEquals(96 + 63, shuffleBufferManager.getUsedMemory());
-    shuffleFlushManager.flush();
+    Thread.sleep(100);
     Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
     // small shuffle id is kept in memory
     assertEquals(63, shuffleBufferManager.getUsedMemory());
@@ -606,7 +604,7 @@ public class ShuffleBufferManagerTest extends BufferTestBase {
     shuffleBufferManager.cacheShuffleData(appId, smallShuffleId, false, createData(0, 31));
     shuffleBufferManager.cacheShuffleData(appId, smallShuffleId, false, createData(0, 31));
     assertEquals(63 * 3, shuffleBufferManager.getUsedMemory());
-    shuffleFlushManager.flush();
+    Thread.sleep(100);
     Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
     assertEquals(0, shuffleBufferManager.getUsedMemory());
     assertEquals(0, shuffleBufferManager.getInFlushSize());
@@ -616,7 +614,7 @@ public class ShuffleBufferManagerTest extends BufferTestBase {
     shuffleBufferManager.cacheShuffleData(appId, smallShuffleId, false, createData(0, 21));
     shuffleBufferManager.cacheShuffleData(appId, smallShuffleIdTwo, false, createData(0, 20));
     assertEquals(54 + 53 + 52, shuffleBufferManager.getUsedMemory());
-    shuffleFlushManager.flush();
+    Thread.sleep(100);
     Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
     assertEquals(52, shuffleBufferManager.getUsedMemory());
     assertEquals(0, shuffleBufferManager.getInFlushSize());
