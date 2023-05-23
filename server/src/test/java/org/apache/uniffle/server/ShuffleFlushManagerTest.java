@@ -170,7 +170,7 @@ public class ShuffleFlushManagerTest extends HdfsTestBase {
       ShuffleDataFlushEvent event = createShuffleDataFlushEvent(appId, 1, 1, 1, null);
       manager.addToFlushQueue(event);
     });
-    waitForFlush(manager, appId, 1, 10 * 5);
+    waitForFlush(manager, appId, 1, 20 * 5);
 
     FileStatus[] fileStatuses = fs.listStatus(new Path(HDFS_URI + "/rss/test/" + appId + "/1/1-1"));
     long actual = Arrays.stream(fileStatuses).filter(x -> x.getPath().getName().endsWith("data")).count();
