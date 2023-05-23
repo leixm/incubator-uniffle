@@ -66,6 +66,8 @@ import org.apache.uniffle.storage.common.HdfsStorage;
 import org.apache.uniffle.storage.common.LocalStorage;
 import org.apache.uniffle.storage.handler.impl.HdfsClientReadHandler;
 import org.apache.uniffle.storage.util.StorageType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -76,6 +78,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class ShuffleFlushManagerTest extends HdfsTestBase {
+  private static final Logger LOG = LoggerFactory.getLogger(ShuffleFlushManagerTest.class);
 
   private static AtomicInteger ATOMIC_INT = new AtomicInteger(0);
   private static AtomicLong ATOMIC_LONG = new AtomicLong(0);
@@ -427,6 +430,7 @@ public class ShuffleFlushManagerTest extends HdfsTestBase {
       }
       retry++;
       size = manager.getCommittedBlockIds(appId, shuffleId).getIntCardinality();
+      LOG.error("waitForFlush appId={}, shuffleId={}, size={}", appId, shuffleId, appId);
     } while (size < expectedBlockNum);
   }
 

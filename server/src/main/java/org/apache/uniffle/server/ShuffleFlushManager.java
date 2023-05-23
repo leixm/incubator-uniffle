@@ -172,8 +172,12 @@ public class ShuffleFlushManager {
           user,
           maxConcurrencyPerPartitionToWrite);
       ShuffleWriteHandler handler = storage.getOrCreateWriteHandler(request);
+      LOG.error("SSSSSS: startWrite appId={}, shuffleId={}, blocks.size()={}",
+          event.getAppId(), event.getShuffleId(), blocks.size());
       writeSuccess = storageManager.write(storage, handler, event);
       if (writeSuccess) {
+        LOG.error("SSSSSS: writeSuccess and updateCommittedBlockIds appId={}, shuffleId={}, blocks.size()={}",
+            event.getAppId(), event.getShuffleId(), blocks.size());
         updateCommittedBlockIds(event.getAppId(), event.getShuffleId(), blocks);
         ShuffleServerMetrics.incStorageSuccessCounter(storage.getStorageHost());
       } else if (event.getRetryTimes() <= retryMax) {
@@ -220,6 +224,8 @@ public class ShuffleFlushManager {
         bitmap.addLong(spb.getBlockId());
       }
     }
+    LOG.error("SSSSSS: after updateCommittedBlockIds appId={} shuffleId={} size={}",
+        appId, shuffleId, bitmap.getIntCardinality());
   }
 
   public Roaring64NavigableMap getCommittedBlockIds(String appId, Integer shuffleId) {
@@ -237,6 +243,7 @@ public class ShuffleFlushManager {
   }
 
   public void removeResources(String appId) {
+    LOG.error("SSSSSS: removeResources appId={}", appId);
     committedBlockIds.remove(appId);
   }
 
@@ -261,6 +268,7 @@ public class ShuffleFlushManager {
   }
 
   public void removeResourcesOfShuffleId(String appId, Collection<Integer> shuffleIds) {
+    LOG.error("SSSSSS: removeResourcesOfShuffleId appId={} shuffleIds={}", appId, shuffleIds.size());
     Optional.ofNullable(committedBlockIds.get(appId))
         .ifPresent(shuffleIdToBlockIds -> shuffleIds.forEach(shuffleIdToBlockIds::remove));
   }
